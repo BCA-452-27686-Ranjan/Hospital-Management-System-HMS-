@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Payment - HMS{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Payment Card -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white py-4">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-credit-card fa-2x me-3"></i>
+                        <div>
+                            <h4 class="mb-0">Complete Your Payment</h4>
+                            <small>Secure Payment Gateway</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    <!-- Appointment Summary -->
+                    <div class="alert alert-info mb-4">
+                        <h6 class="mb-3"><i class="fas fa-calendar-check me-2"></i>Appointment Summary</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Patient:</strong> {{ appointment_summary.patient_name }}</p>
+                                <p class="mb-1"><strong>Doctor:</strong> {{ doctor_name }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Reason:</strong> {{ appointment_summary.reason }}</p>
+                                <p class="mb-1"><strong>Priority:</strong> {{ appointment_summary.priority }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0">Consultation Fee:</span>
+                            <span class="h4 text-primary mb-0">₹{{ consultation_fee }}</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-warning text-dark">Status: PENDING_PAYMENT</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Form -->
+                    <form method="post" id="paymentForm">
+                        {% csrf_token %}
+                        
+                        <h6 class="mb-3"><i class="fas fa-wallet me-2"></i>Select Payment Method</h6>
+                        
+                        <!-- Payment Method Selection -->
+                        <div class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="payment-method-card card h-100 cursor-pointer" onclick="selectPaymentMethod('CARD')">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-credit-card fa-2x text-primary mb-2"></i>
+                                            <h6 class="mb-0">Card</h6>
+                                            <small class="text-muted">Credit/Debit</small>
+                                            <input type="radio" name="payment_method" value="CARD" id="method_card" class="d-none">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="payment-method-card card h-100 cursor-pointer" onclick="selectPaymentMethod('UPI')">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-mobile-alt fa-2x text-success mb-2"></i>
+                                            <h6 class="mb-0">UPI</h6>
+                                            <small class="text-muted">Google Pay, PhonePe</small>
+                                            <input type="radio" name="payment_method" value="UPI" id="method_upi" class="d-none">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="payment-method-card card h-100 cursor-pointer" onclick="selectPaymentMethod('NET_BANKING')">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-university fa-2x text-info mb-2"></i>
+                                            <h6 class="mb-0">Net Banking</h6>
+                                            <small class="text-muted">All Banks</small>
+                                            <input type="radio" name="payment_method" value="NET_BANKING" id="method_netbanking" class="d-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if form.payment_method.errors %}
+                                <div class="text-danger mt-2">
+                                    {{ form.payment_method.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Card Details -->
+                        <div id="cardDetails" class="payment-details" style="display: none;">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-3">Card Details</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Card Number</label>
+                                        <input type="text" class="form-control" name="card_number" placeholder="1234 5678 9012 3456" maxlength="19">
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Expiry Date</label>
+                                            <input type="text" class="form-control" name="card_expiry" placeholder="MM/YY" maxlength="5">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">CVV</label>
+                                            <input type="text" class="form-control" name="card_cvv" placeholder="123" maxlength="3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- UPI Details -->
+                        <div id="upiDetails" class="payment-details" style="display: none;">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-3">UPI Payment</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">UPI ID</label>
+                                        <input type="text" class="form-control" name="upi_id" placeholder="yourname@upi">
+                                        <small class="text-muted">Enter your UPI ID (e.g., mobilenumber@upi, username@paytm)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Net Banking Details -->
+                        <div id="netBankingDetails" class="payment-details" style="display: none;">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title mb-3">Net Banking</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Select Bank</label>
+                                        <select class="form-select" name="bank_name">
+                                            <option value="">Select Your Bank</option>
+                                            <option value="SBI">State Bank of India</option>
+                                            <option value="HDFC">HDFC Bank</option>
+                                            <option value="ICICI">ICICI Bank</option>
+                                            <option value="PNB">Punjab National Bank</option>
+                                            <option value="AXIS">Axis Bank</option>
+                                            <option value="KOTAK">Kotak Mahindra Bank</option>
+                                            <option value="BOB">Bank of Baroda</option>
+                                            <option value="CANARA">Canara Bank</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Account Number</label>
+                                        <input type="text" class="form-control" name="account_number" placeholder="Enter account number">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Notice -->
+                        <div class="alert alert-warning">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            <strong>Security Notice:</strong> This is a mock payment system for demonstration purposes. No real money will be deducted.
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'appointments:book_appointment' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Booking
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg" id="payNowBtn">
+                                <i class="fas fa-lock me-2"></i>Pay Now ₹{{ consultation_fee }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-method-card {
+        border: 2px solid #dee2e6;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .payment-method-card:hover {
+        border-color: #0d6efd;
+        transform: translateY(-2px);
+    }
+    .payment-method-card.selected {
+        border-color: #0d6efd;
+        background-color: #f8f9ff;
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function selectPaymentMethod(method) {
+        // Remove selected class from all cards
+        document.querySelectorAll('.payment-method-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked card
+        const selectedCard = document.querySelector(`input[value="${method}"]`).closest('.payment-method-card');
+        selectedCard.classList.add('selected');
+        
+        // Check the radio button
+        document.getElementById(`method_${method.toLowerCase()}`).checked = true;
+        
+        // Show relevant details
+        document.querySelectorAll('.payment-details').forEach(details => {
+            details.style.display = 'none';
+        });
+        
+        if (method === 'CARD') {
+            document.getElementById('cardDetails').style.display = 'block';
+        } else if (method === 'UPI') {
+            document.getElementById('upiDetails').style.display = 'block';
+        } else if (method === 'NET_BANKING') {
+            document.getElementById('netBankingDetails').style.display = 'block';
+        }
+    }
+    
+    // Form validation
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (!paymentMethod) {
+            e.preventDefault();
+            alert('Please select a payment method');
+            return;
+        }
+        
+        // Validate based on payment method
+        if (paymentMethod.value === 'CARD') {
+            const cardNumber = document.querySelector('input[name="card_number"]').value;
+            const cardExpiry = document.querySelector('input[name="card_expiry"]').value;
+            const cardCvv = document.querySelector('input[name="card_cvv"]').value;
+            if (!cardNumber || !cardExpiry || !cardCvv) {
+                e.preventDefault();
+                alert('Please fill in all card details');
+                return;
+            }
+        } else if (paymentMethod.value === 'UPI') {
+            const upiId = document.querySelector('input[name="upi_id"]').value;
+            if (!upiId) {
+                e.preventDefault();
+                alert('Please enter UPI ID');
+                return;
+            }
+        } else if (paymentMethod.value === 'NET_BANKING') {
+            const bankName = document.querySelector('select[name="bank_name"]').value;
+            const accountNumber = document.querySelector('input[name="account_number"]').value;
+            if (!bankName || !accountNumber) {
+                e.preventDefault();
+                alert('Please fill in all banking details');
+                return;
+            }
+        }
+        
+        // Show loading state
+        const btn = document.getElementById('payNowBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    });
+</script>
+{% endblock %}

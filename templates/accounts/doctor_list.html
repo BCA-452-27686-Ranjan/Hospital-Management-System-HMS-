@@ -1,0 +1,524 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Find Doctors - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+.doctor-list-container {
+    min-height: 80vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.doctor-list-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    z-index: 1;
+}
+
+.doctor-list-content {
+    position: relative;
+    z-index: 10;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    color: white;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.filter-section {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.filter-form {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.filter-select {
+    min-width: 200px;
+    padding: 0.5rem 1rem;
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: 8px;
+    background: white;
+    color: #2c3e50;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-filter {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-filter:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.doctor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.doctor-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-link-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    text-decoration: none;
+}
+
+.doctor-actions {
+    display: flex;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-view-profile,
+.btn-book-appointment {
+    position: relative;
+    z-index: 2;
+}
+
+.doctor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.doctor-card:hover::before {
+    opacity: 1;
+}
+
+.doctor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.2);
+}
+
+.doctor-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.doctor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    margin-right: 1rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: white;
+    font-size: 2rem;
+}
+
+.doctor-info h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+}
+
+.doctor-specialization {
+    color: #667eea;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.doctor-details {
+    margin-bottom: 1rem;
+}
+
+.doctor-detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: #495057;
+    font-size: 0.9rem;
+}
+
+.doctor-detail-item i {
+    width: 20px;
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.doctor-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-view-profile {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-view-profile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-book-appointment {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-book-appointment:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination a,
+.pagination span {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.pagination a {
+    background: rgba(255, 255, 255, 0.75);
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+}
+
+.pagination a:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.pagination .current {
+    background: #667eea;
+    color: white;
+}
+
+.no-doctors {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.no-doctors i {
+    font-size: 4rem;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.no-doctors h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.no-doctors p {
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .doctor-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-select {
+        width: 100%;
+    }
+    
+    .doctor-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="doctor-list-container">
+    <div class="doctor-list-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Find Your Doctor</h1>
+                <p class="page-subtitle">Browse our qualified healthcare professionals</p>
+            </div>
+
+            <div class="filter-section">
+                <form method="get" class="filter-form">
+                    <label class="filter-label">Filter by Specialization:</label>
+                    <select name="specialization" class="filter-select">
+                        <option value="">All Specializations</option>
+                        {% for specialization in specializations %}
+                            <option value="{{ specialization }}" {% if current_specialization == specialization %}selected{% endif %}>
+                                {{ specialization }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-filter me-2"></i>Filter
+                    </button>
+                    {% if current_specialization %}
+                        <a href="{% url 'accounts:doctor_list' %}" class="btn-filter">
+                            <i class="fas fa-times me-2"></i>Clear
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+
+            {% if page_obj %}
+                <div class="doctor-grid">
+                    {% for doctor in page_obj %}
+                        <div class="doctor-card">
+                            <a href="{% url 'accounts:doctor_profile' doctor.id %}" class="card-link-overlay"></a>
+                            <div class="doctor-header">
+                                {% if doctor.profile_image_url and doctor.profile_image_url != '/static/img/default-avatar.png' %}
+                                    <img src="{{ doctor.profile_image_url }}" alt="Dr. {{ doctor.get_full_name|default:doctor.username }}" class="doctor-avatar"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Doctor profile image failed to load:', '{{ doctor.profile_image_url }}');">
+                                    <div class="doctor-avatar-placeholder" style="display: none;">
+                                        <i class="fas fa-user-md"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="doctor-avatar-placeholder">
+                                        <i class="fas fa-user-md"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="doctor-info">
+                                    <h3>Dr. {{ doctor.get_full_name|default:doctor.username }}</h3>
+                                    <div class="doctor-specialization">
+                                        {% if doctor.doctor_profile %}
+                                            {{ doctor.doctor_profile.get_specialization_display|default:'General Practice' }}
+                                        {% else %}
+                                            General Practice
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="doctor-details">
+                                {% if doctor.doctor_profile %}
+                                    {% if doctor.doctor_profile.experience_years %}
+                                        <div class="doctor-detail-item">
+                                            <i class="fas fa-briefcase"></i>
+                                            <span>{{ doctor.doctor_profile.experience_years }} years experience</span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if doctor.doctor_profile.phone %}
+                                        <div class="doctor-detail-item">
+                                            <i class="fas fa-phone"></i>
+                                            <span>{{ doctor.doctor_profile.phone }}</span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if doctor.doctor_profile.consultation_fee %}
+                                        <div class="doctor-detail-item">
+                                            <i class="fas fa-rupee-sign"></i>
+                                            <span>Consultation: ₹{{ doctor.doctor_profile.consultation_fee }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                                
+                                <div class="doctor-detail-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>{{ doctor.email }}</span>
+                                </div>
+                            </div>
+
+                            <div class="doctor-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number">
+                                        {{ doctor.total_appointments|default:0 }}
+                                    </div>
+                                    <div class="stat-label">Total</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">
+                                        {{ doctor.completed_appointments|default:0 }}
+                                    </div>
+                                    <div class="stat-label">Completed</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="stat-label">Rating</div>
+                                </div>
+                            </div>
+
+                            <div class="doctor-actions">
+                                <a href="{% url 'accounts:doctor_profile' doctor.id %}" class="btn-view-profile">
+                                    <i class="fas fa-user-circle me-1"></i>View Profile
+                                </a>
+                                <a href="{% url 'appointments:book_appointment' %}?doctor={{ doctor.id }}" class="btn-book-appointment">
+                                    <i class="fas fa-calendar-plus me-1"></i>Book
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_other_pages %}
+                    <div class="pagination">
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}{% if current_specialization %}&specialization={{ current_specialization }}{% endif %}">Previous</a>
+                        {% endif %}
+                        
+                        <span class="current">{{ page_obj.number }}</span>
+                        
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}{% if current_specialization %}&specialization={{ current_specialization }}{% endif %}">Next</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="no-doctors">
+                    <i class="fas fa-user-md"></i>
+                    <h3>No Doctors Found</h3>
+                    <p>No doctors are currently available matching your criteria.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

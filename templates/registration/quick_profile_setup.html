@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Profile - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h4><i class="fas fa-user-check me-2"></i>Complete Your Profile</h4>
+                    <p class="mb-0">Just a few more details to get you started!</p>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if user.role == 'DOCTOR' %}
+                            <!-- Doctor Profile Setup -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" name="phone" 
+                                                   value="{{ user.doctorprofile.phone }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Specialization</label>
+                                        <select class="form-select" name="specialization" required>
+                                            <option value="">Select specialization</option>
+                                            <option value="General Practitioner" {% if user.doctorprofile.specialization == 'General Practitioner' %}selected{% endif %}>General Practitioner</option>
+                                            <option value="Cardiologist" {% if user.doctorprofile.specialization == 'Cardiologist' %}selected{% endif %}>Cardiologist</option>
+                                            <option value="Dermatologist" {% if user.doctorprofile.specialization == 'Dermatologist' %}selected{% endif %}>Dermatologist</option>
+                                            <option value="Pediatrician" {% if user.doctorprofile.specialization == 'Pediatrician' %}selected{% endif %}>Pediatrician</option>
+                                            <option value="Orthopedic" {% if user.doctorprofile.specialization == 'Orthopedic' %}selected{% endif %}>Orthopedic</option>
+                                            <option value="Neurologist" {% if user.doctorprofile.specialization == 'Neurologist' %}selected{% endif %}>Neurologist</option>
+                                            <option value="Psychiatrist" {% if user.doctorprofile.specialization == 'Psychiatrist' %}selected{% endif %}>Psychiatrist</option>
+                                            <option value="Surgeon" {% if user.doctorprofile.specialization == 'Surgeon' %}selected{% endif %}>Surgeon</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Years of Experience</label>
+                                        <input type="number" class="form-control" name="experience" 
+                                               value="{{ user.doctorprofile.experience }}" min="0" max="50" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">License Number</label>
+                                        <input type="text" class="form-control" name="license_number" 
+                                               value="{{ user.doctorprofile.license_number }}" readonly>
+                                        <small class="text-muted">License number cannot be changed</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Verification Status</label>
+                                <div class="alert alert-info">
+                                    {% if user.doctorprofile.is_verified %}
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Verified</strong> - Your account is fully verified
+                                    {% else %}
+                                        <i class="fas fa-clock me-2"></i>
+                                        <strong>Pending Verification</strong> - Admin will verify your credentials
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                        {% else %}
+                            <!-- Patient Profile Setup -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Phone Number</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" name="phone" 
+                                                   value="{{ user.patientprofile.phone }}" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" name="date_of_birth" 
+                                               value="{{ user.patientprofile.date_of_birth|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" name="gender">
+                                            <option value="">Select gender</option>
+                                            <option value="Male" {% if user.patientprofile.gender == 'Male' %}selected{% endif %}>Male</option>
+                                            <option value="Female" {% if user.patientprofile.gender == 'Female' %}selected{% endif %}>Female</option>
+                                            <option value="Other" {% if user.patientprofile.gender == 'Other' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Blood Group</label>
+                                        <select class="form-select" name="blood_group">
+                                            <option value="">Select blood group</option>
+                                            <option value="A+" {% if user.patientprofile.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                            <option value="A-" {% if user.patientprofile.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                            <option value="B+" {% if user.patientprofile.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                            <option value="B-" {% if user.patientprofile.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                            <option value="AB+" {% if user.patientprofile.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                            <option value="AB-" {% if user.patientprofile.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                            <option value="O+" {% if user.patientprofile.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                            <option value="O-" {% if user.patientprofile.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Emergency Contact Name</label>
+                                        <input type="text" class="form-control" name="emergency_contact_name" 
+                                               value="{{ user.patientprofile.emergency_contact_name }}" 
+                                               placeholder="Emergency contact person">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Emergency Contact Phone</label>
+                                        <input type="tel" class="form-control" name="emergency_contact_phone" 
+                                               value="{{ user.patientprofile.emergency_contact_phone }}" 
+                                               placeholder="Emergency contact number">
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save me-2"></i>Complete Profile
+                            </button>
+                        </div>
+
+                        <!-- Skip Option -->
+                        <div class="text-center mt-3">
+                            <a href="{% if user.role == 'DOCTOR' %}{% url 'appointments:doctor_dashboard' %}{% else %}{% url 'dashboard:home' %}{% endif %}" 
+                               class="text-decoration-none text-muted">
+                                <small>Skip for now</small>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

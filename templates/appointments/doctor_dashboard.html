@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Custom Status Badge Colors */
+.status-pending {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%) !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+}
+
+.status-scheduled {
+    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #6c5ce7 0%, #574b90 100%) !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+}
+
+.status-cancelled {
+    background: linear-gradient(135deg, #636e72 0%, #2d3436 100%) !important;
+    color: white !important;
+    font-weight: 600;
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+}
+
+/* Custom Priority Badge Colors */
+.priority-high {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+    color: white !important;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.priority-medium {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%) !important;
+    color: white !important;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+}
+
+.priority-low {
+    background: linear-gradient(135deg, #27ae60 0%, #229954 100%) !important;
+    color: white !important;
+    font-weight: 700;
+    padding: 0.35rem 0.7rem;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+/* Enhanced card hover effects */
+.card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced button styles */
+.btn {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Table enhancements */
+.table {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.table th {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 600;
+    border: none;
+    padding: 1rem;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem;
+    border-color: #f8f9fa;
+}
+
+/* Statistics cards enhancement */
+.card.border-primary {
+    border: 2px solid #667eea !important;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+}
+
+.card.border-warning {
+    border: 2px solid #ffa502 !important;
+    background: linear-gradient(135deg, rgba(255, 165, 2, 0.05) 0%, rgba(255, 118, 117, 0.05) 100%);
+}
+
+.card.border-info {
+    border: 2px solid #4ecdc4 !important;
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.05) 0%, rgba(68, 160, 141, 0.05) 100%);
+}
+
+.card.border-success {
+    border: 2px solid #6c5ce7 !important;
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.05) 0%, rgba(87, 75, 144, 0.05) 100%);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Doctor Dashboard</h3>
+                <span class="badge bg-primary fs-6">Dr. {{ user.get_full_name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                    <i class="fas fa-calendar-day fa-2x text-primary mb-2"></i>
+                    <h3 class="counter" data-target="{{ today_appointments_count }}">{{ today_appointments_count }}</h3>
+                    <p class="card-text">Today's Appointments</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="counter" data-target="{{ pending_appointments_count }}">{{ pending_appointments_count }}</h3>
+                    <p class="card-text">Pending Confirmation</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-info">
+                <div class="card-body">
+                    <i class="fas fa-calendar-check fa-2x text-info mb-2"></i>
+                    <h3 class="counter" data-target="{{ scheduled_appointments_count }}">{{ scheduled_appointments_count }}</h3>
+                    <p class="card-text">Scheduled</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="counter" data-target="{{ completed_appointments_count }}">{{ completed_appointments_count }}</h3>
+                    <p class="card-text">Completed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Today's Appointments -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-calendar-day me-2"></i>Today's Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if today_appointments %}
+                        {% for appointment in today_appointments %}
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                <div>
+                                    <h6 class="mb-1">{{ appointment.patient_name }}</h6>
+                                    <small class="text-muted">{{ appointment.appointment_date|date:"H:i" }} - {{ appointment.get_priority_display }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-{{ appointment.status|lower }} status-{{ appointment.status|lower }}">
+                                        {{ appointment.get_status_display }}
+                                    </span>
+                                    {% if appointment.status == 'PENDING' %}
+                                        <a href="{% url 'appointments:confirm_appointment' appointment.pk %}" 
+                                           class="btn btn-sm btn-success ms-2">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No appointments scheduled for today</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Confirmation -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-clock me-2"></i>Pending Confirmation</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_appointments %}
+                        {% for appointment in pending_appointments %}
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                                <div>
+                                    <h6 class="mb-1">{{ appointment.patient_name }}</h6>
+                                    <small class="text-muted">{{ appointment.appointment_date|date:"M d, Y H:i" }} - {{ appointment.get_priority_display }}</small>
+                                </div>
+                                <div>
+                                    <a href="{% url 'appointments:confirm_appointment' appointment.pk %}" 
+                                       class="btn btn-sm btn-success">
+                                        <i class="fas fa-check me-1"></i>Confirm
+                                    </a>
+                                    <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No pending appointments</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Patient Feedback Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-star me-2"></i>Patient Feedback</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_feedback %}
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <h2 class="text-warning mb-1">{{ average_rating }}/5</h2>
+                                    <div class="mb-2">
+                                        {% for i in "12345" %}
+                                            {% if forloop.counter <= average_rating|default:0 %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-muted"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <small class="text-muted">{{ feedback_count }} total reviews</small>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h6 class="mb-3">Recent Reviews:</h6>
+                                {% for feedback in recent_feedback %}
+                                    <div class="d-flex align-items-start mb-3 pb-3 border-bottom">
+                                        <div class="flex-shrink-0">
+                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <h6 class="mb-0">{{ feedback.patient.get_full_name|default:feedback.patient.username }}</h6>
+                                                <small class="text-muted">{{ feedback.created_at|date:"M d, Y" }}</small>
+                                            </div>
+                                            <div class="mb-1">
+                                                {% for i in "12345" %}
+                                                    {% if forloop.counter <= feedback.rating %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <span class="badge {% if feedback.would_recommend %}bg-success{% else %}bg-secondary{% endif %} ms-2">
+                                                    {% if feedback.would_recommend %}
+                                                        <i class="fas fa-thumbs-up me-1"></i>Recommended
+                                                    {% else %}
+                                                        <i class="fas fa-thumbs-down me-1"></i>Not Recommended
+                                                    {% endif %}
+                                                </span>
+                                            </div>
+                                            {% if feedback.comments %}
+                                                <p class="text-muted mb-0 small">"{{ feedback.comments }}"</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-star fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No feedback received yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Appointments with Medical Reports Access -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-history me-2"></i>Recent Appointments</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Patient</th>
+                                        <th>Date & Time</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Medical Reports</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in recent_appointments %}
+                                        <tr>
+                                            <td>{{ appointment.patient_name }}</td>
+                                            <td>{{ appointment.appointment_date|date:"M d, Y H:i" }}</td>
+                                            <td><span class="badge bg-{{ appointment.status|lower }} status-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span></td>
+                                            <td><span class="badge bg-{{ appointment.priority|lower }}">{{ appointment.get_priority_display }}</span></td>
+                                            <td>
+                                                <!-- Medical Reports button removed - URL not available -->
+                                                <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                    View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <a href="{% url 'appointments:my_appointments' %}" class="btn btn-primary">
+                                <i class="fas fa-list me-2"></i>View All Appointments
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No appointments yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

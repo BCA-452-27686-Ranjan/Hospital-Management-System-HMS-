@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Record - {{ record.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .patient-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .record-info {
+            margin-bottom: 20px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .value {
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Medical Record</h1>
+        <h2>Hospital Management System</h2>
+    </div>
+
+    <div class="patient-info">
+        <h3>Patient Information</h3>
+        <p><span class="label">Name:</span><span class="value">{{ patient.get_full_name|default:patient.username }}</span></p>
+        <p><span class="label">Patient ID:</span><span class="value">PAT-{{ patient.id|stringformat:"05d" }}</span></p>
+        <p><span class="label">Email:</span><span class="value">{{ patient.email }}</span></p>
+        {% if patient.patient_profile %}
+        <p><span class="label">Phone:</span><span class="value">{{ patient.patient_profile.phone|default:"N/A" }}</span></p>
+        <p><span class="label">Blood Group:</span><span class="value">{{ patient.patient_profile.blood_group|default:"N/A" }}</span></p>
+        {% endif %}
+    </div>
+
+    <div class="record-info">
+        <h3>Record Details</h3>
+        <p><span class="label">Record Type:</span><span class="value">{{ record.get_record_type_display }}</span></p>
+        <p><span class="label">Title:</span><span class="value">{{ record.title }}</span></p>
+        <p><span class="label">Record Date:</span><span class="value">{{ record.record_date|date:"F d, Y" }}</span></p>
+        {% if record.doctor %}
+        <p><span class="label">Doctor:</span><span class="value">Dr. {{ record.doctor.get_full_name }}</span></p>
+        {% endif %}
+        <p><span class="label">Created:</span><span class="value">{{ record.created_at|date:"F d, Y H:i" }}</span></p>
+    </div>
+
+    {% if record.description %}
+    <div class="record-info">
+        <h3>Description</h3>
+        <p>{{ record.description|linebreaks }}</p>
+    </div>
+    {% endif %}
+
+    {% if record.file %}
+    <div class="record-info">
+        <h3>Attached File</h3>
+        <p><span class="label">File Name:</span><span class="value">{{ record.file.name }}</span></p>
+        <p><span class="label">File Size:</span><span class="value">{{ record.file.size|filesizeformat }}</span></p>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>This is a computer-generated medical record.</p>
+        <p>Generated on: {% now "F d, Y H:i:s" %}</p>
+        <p>Hospital Management System - Patient Portal</p>
+    </div>
+</body>
+</html>

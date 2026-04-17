@@ -1,0 +1,362 @@
+{% extends 'base.html' %}
+
+{% block title %}Advanced Search - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Advanced Search</h2>
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="exportData('csv')">
+                        <i class="fas fa-file-csv me-2"></i>Export CSV
+                    </button>
+                    <button class="btn btn-outline-success" onclick="exportData('excel')">
+                        <i class="fas fa-file-excel me-2"></i>Export Excel
+                    </button>
+                    <a href="{% url 'appointments:analytics' %}" class="btn btn-outline-info">
+                        <i class="fas fa-chart-bar me-2"></i>Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-search me-2"></i>Search Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="searchForm">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Search</label>
+                                    {{ form.search }}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Status</label>
+                                    {{ form.status }}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Priority</label>
+                                    {{ form.priority }}
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="mb-3">
+                                    <label class="form-label">Export Format</label>
+                                    {{ form.export_format }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Date From</label>
+                                    {{ form.date_from }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Date To</label>
+                                    {{ form.date_to }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Doctor</label>
+                                    {{ form.doctor }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Patient</label>
+                                    {{ form.patient }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                                    <i class="fas fa-times me-2"></i>Clear Filters
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                    <h4 class="text-primary">{{ statistics.total }}</h4>
+                    <p class="card-text">Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                    <h4 class="text-success">{{ statistics.completed }}</h4>
+                    <p class="card-text">Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                    <h4 class="text-warning">{{ statistics.pending }}</h4>
+                    <p class="card-text">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-info">
+                <div class="card-body">
+                    <h4 class="text-info">{{ statistics.scheduled }}</h4>
+                    <p class="card-text">Scheduled</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-danger">
+                <div class="card-body">
+                    <h4 class="text-danger">{{ statistics.cancelled }}</h4>
+                    <p class="card-text">Cancelled</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card text-center border-secondary">
+                <div class="card-body">
+                    <h4 class="text-secondary">{{ statistics.completion_rate }}%</h4>
+                    <p class="card-text">Completion Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-list me-2"></i>Search Results</h5>
+                    <span class="badge bg-light text-dark">{{ page_obj.paginator.count }} Results</span>
+                </div>
+                <div class="card-body">
+                    {% if page_obj %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                        </th>
+                                        <th>ID</th>
+                                        <th>Patient Name</th>
+                                        <th>Email</th>
+                                        <th>Doctor</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                        <th>Priority</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in page_obj %}
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" name="selected_appointments" 
+                                                       value="{{ appointment.pk }}" 
+                                                       class="appointment-checkbox">
+                                            </td>
+                                            <td>{{ appointment.pk }}</td>
+                                            <td>{{ appointment.patient_name }}</td>
+                                            <td>{{ appointment.patient_email }}</td>
+                                            <td>Dr. {{ appointment.doctor.get_full_name }}</td>
+                                            <td>{{ appointment.appointment_date|date:"Y-m-d" }}</td>
+                                            <td>{{ appointment.appointment_date|time:"H:i" }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ appointment.status|lower }}">
+                                                    {{ appointment.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ appointment.priority|lower }}">
+                                                    {{ appointment.get_priority_display }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                        
+                        <!-- Bulk Actions -->
+                        <div class="mt-3">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <select class="form-select" id="bulkAction">
+                                        <option value="">Select Bulk Action</option>
+                                        <option value="confirm">Confirm Selected</option>
+                                        <option value="cancel">Cancel Selected</option>
+                                        <option value="complete">Mark as Completed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-success" onclick="applyBulkAction()">
+                                        <i class="fas fa-check me-2"></i>Apply Action
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h5>No appointments found</h5>
+                            <p class="text-muted">Try adjusting your search criteria</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportData(format) {
+    const form = document.getElementById('searchForm');
+    const currentUrl = new URL(window.location);
+    
+    // Add export parameter
+    currentUrl.searchParams.set('format', format);
+    currentUrl.searchParams.delete('page'); // Remove pagination
+    
+    // Open export URL
+    window.location.href = currentUrl.toString();
+}
+
+function clearFilters() {
+    document.getElementById('searchForm').reset();
+    window.location.href = '{% url "appointments:advanced_search" %}';
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.appointment-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+}
+
+function applyBulkAction() {
+    const action = document.getElementById('bulkAction').value;
+    const selectedAppointments = [];
+    
+    document.querySelectorAll('.appointment-checkbox:checked').forEach(checkbox => {
+        selectedAppointments.push(checkbox.value);
+    });
+    
+    if (selectedAppointments.length === 0) {
+        alert('Please select at least one appointment.');
+        return;
+    }
+    
+    if (!action) {
+        alert('Please select a bulk action.');
+        return;
+    }
+    
+    // Submit bulk action
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/appointments/bulk-action/';
+    
+    // Add CSRF token
+    const csrfToken = document.createElement('input');
+    csrfToken.type = 'hidden';
+    csrfToken.name = 'csrfmiddlewaretoken';
+    csrfToken.value = '{{ csrf_token }}';
+    form.appendChild(csrfToken);
+    
+    // Add action
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = action;
+    form.appendChild(actionInput);
+    
+    // Add selected appointments
+    selectedAppointments.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'selected_appointments';
+        input.value = id;
+        form.appendChild(input);
+    });
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+</script>
+{% endblock %}

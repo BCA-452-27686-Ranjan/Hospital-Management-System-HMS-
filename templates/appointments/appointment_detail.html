@@ -1,0 +1,1329 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointment Details - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fix navbar overlap for appointment detail page */
+body {
+    padding-top: 0 !important;
+}
+
+.appointment-detail-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.appointment-detail-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.appointment-detail-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(255, 215, 0, 0.03) 0%, transparent 50%);
+    z-index: 2;
+    animation: floatingGradient 20s ease-in-out infinite;
+}
+
+@keyframes floatingGradient {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(-10px, -10px) rotate(90deg); }
+    50% { transform: translate(10px, -5px) rotate(180deg); }
+    75% { transform: translate(-5px, 10px) rotate(270deg); }
+}
+
+.detail-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(25px);
+    border-radius: 30px;
+    padding: 3rem;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 10;
+    margin-bottom: 2rem;
+    animation: slideInUp 0.8s ease;
+    overflow: hidden;
+}
+
+.detail-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: float 30s linear infinite;
+    z-index: -1;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-30px, -30px) rotate(360deg); }
+}
+
+.detail-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.detail-title i {
+    color: #ffd700;
+    font-size: 2.5rem;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.status-badge-large {
+    padding: 1rem 2rem;
+    border-radius: 30px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4); }
+    to { box-shadow: 0 20px 45px rgba(102, 126, 234, 0.6); }
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: relative;
+    z-index: 10;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.detail-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.4s ease;
+    overflow: hidden;
+    animation: slideInUp 0.8s ease;
+    position: relative;
+}
+
+.detail-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+    z-index: -1;
+}
+
+.detail-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: float 40s linear infinite;
+    z-index: -1;
+}
+
+.detail-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 35px 70px rgba(0, 0, 0, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.card-header-custom {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(15px);
+    padding: 2rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header-custom::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+    animation: slideShine 3s infinite;
+}
+
+@keyframes slideShine {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+}
+
+.card-header-custom h5 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ffd700 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.card-header-custom h5 i {
+    color: #ffd700;
+    font-size: 1.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.card-body-custom {
+    padding: 2.5rem;
+}
+
+.info-section {
+    margin-bottom: 2rem;
+}
+
+.info-section h6 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.5rem;
+}
+
+.info-table td {
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.info-table td:first-child {
+    font-weight: 600;
+    color: #667eea;
+    width: 40%;
+}
+
+.info-table td:last-child {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.priority-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.priority-low {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    color: white;
+}
+
+.priority-medium {
+    background: linear-gradient(135deg, #fd7e14 0%, #e55a00 100%);
+    color: white;
+}
+
+.priority-high {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: white;
+}
+
+.status-scheduled {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+}
+
+.status-cancelled {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+}
+
+.notes-section {
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.notes-section h6 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.notes-section h6 i {
+    color: #ffd700;
+}
+
+.notes-content {
+    color: #2c3e50;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    flex: 1;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.btn-action {
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.4s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid transparent;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-action:hover::before {
+    left: 100%;
+}
+
+.btn-action:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+    text-decoration: none;
+}
+
+.btn-primary-action {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-primary-action:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success-action {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-success-action:hover {
+    background: linear-gradient(135deg, #218838 0%, #1c6e2c 100%);
+    box-shadow: 0 20px 40px rgba(40, 167, 69, 0.4);
+}
+
+.btn-danger-action {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-danger-action:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+    box-shadow: 0 20px 40px rgba(220, 53, 69, 0.4);
+}
+
+.btn-info-action {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-info-action:hover {
+    background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+    box-shadow: 0 20px 40px rgba(23, 162, 184, 0.4);
+}
+
+.btn-warning-action {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-warning-action:hover {
+    background: linear-gradient(135deg, #e0a800 0%, #d58512 100%);
+    box-shadow: 0 20px 40px rgba(255, 193, 7, 0.4);
+}
+
+.medical-record-card {
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+    border: 2px solid #2e7d32;
+    box-shadow: 0 20px 60px rgba(46, 125, 50, 0.15);
+}
+
+.medical-record-header {
+    background: linear-gradient(135deg, #1a5f4a 0%, #2e7d32 100%);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.medical-record-header h5 {
+    color: white;
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.medical-record-header h5 i {
+    color: #fff;
+    font-size: 1.4rem;
+}
+
+.btn-print {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 0.6rem 1.2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-print:hover {
+    background: white;
+    color: #2e7d32;
+    transform: translateY(-2px);
+}
+
+.medical-record-body {
+    padding: 2rem;
+}
+
+.record-field {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 15px;
+    border-left: 5px solid #2e7d32;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.record-field:hover {
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.record-field-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px dashed #e0e0e0;
+}
+
+.record-field-header i {
+    font-size: 1.2rem;
+    color: #2e7d32;
+}
+
+.record-field-header h6 {
+    margin: 0;
+    color: #1a5f4a;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.record-field-content {
+    color: #333;
+    line-height: 1.8;
+    font-size: 1rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 10px;
+    min-height: 60px;
+}
+
+.record-field-content:empty::before {
+    content: 'To be updated';
+    color: #999;
+    font-style: italic;
+}
+
+.record-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #e0e0e0;
+}
+
+.record-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.record-meta-item i {
+    color: #2e7d32;
+}
+
+/* Print Styles */
+@media print {
+    body {
+        padding: 0 !important;
+        background: white !important;
+    }
+    
+    .appointment-detail-container {
+        background: white !important;
+        padding: 0 !important;
+    }
+    
+    .detail-header,
+    .action-buttons,
+    .btn-print,
+    .btn-action,
+    .btn-close {
+        display: none !important;
+    }
+    
+    .medical-record-card {
+        box-shadow: none !important;
+        border: 2px solid #2e7d32 !important;
+        page-break-inside: avoid;
+    }
+    
+    .medical-record-header {
+        background: #2e7d32 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    
+    .record-field {
+        page-break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+    
+    .detail-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        margin-bottom: 1rem !important;
+    }
+}
+
+.feedback-card {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.rating-display {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.rating-stars {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.rating-stars .fas {
+    color: #ffd700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rating-stars .far {
+    color: #ddd;
+}
+
+.rating-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.recommendation-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.recommendation-yes {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+}
+
+/* Medical Reports Section */
+.reports-section {
+    margin-top: 1.5rem;
+}
+
+.reports-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.report-item {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.report-item:hover {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.3);
+}
+
+.report-info {
+    flex: 1;
+}
+
+.report-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.report-meta {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.report-date {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.report-desc {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.report-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-report {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-view-report {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border: none;
+}
+
+.btn-view-report:hover {
+    background: linear-gradient(135deg, #138496 0%, #0d6efd 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-download-report {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+}
+
+.btn-download-report:hover {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-cancel-report {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.4s ease;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-cancel-report:hover {
+    background: linear-gradient(135deg, #c82333 0%, #a02622 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.recommendation-no {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    color: white;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .appointment-detail-container {
+        padding: 1rem;
+    }
+    
+    .detail-header {
+        padding: 2rem;
+    }
+    
+    .detail-title {
+        font-size: 2rem;
+    }
+    
+    .main-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .payment-status-indicator {
+        text-align: right;
+    }
+    
+    .payment-badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+    }
+    
+    .payment-slip-info {
+        text-align: right;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-detail-container">
+    <div class="detail-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="detail-title">
+                <i class="fas fa-calendar-check"></i>
+                Appointment Details
+            </h1>
+            <div class="d-flex flex-column align-items-end">
+                <span class="status-badge-large">{{ appointment.get_status_display }}</span>
+                {% if user.role == 'DOCTOR' %}
+                    <div class="payment-status-indicator mt-2">
+                        <strong>Payment Status:</strong>
+                        {% if appointment.payment_status == 'SUCCESSFUL' %}
+                            <span class="badge bg-success payment-badge">
+                                <i class="fas fa-check-circle me-1"></i>Payment Complete
+                            </span>
+                        {% elif appointment.payment_status == 'PENDING' %}
+                            <span class="badge bg-warning payment-badge">
+                                <i class="fas fa-clock me-1"></i>Payment Pending
+                            </span>
+                        {% elif appointment.payment_status == 'FAILED' %}
+                            <span class="badge bg-danger payment-badge">
+                                <i class="fas fa-times-circle me-1"></i>Payment Failed
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary payment-badge">
+                                <i class="fas fa-question-circle me-1"></i>No Payment
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if appointment.payment_slip %}
+                        <div class="payment-slip-info mt-1">
+                            <small class="text-muted">
+                                <i class="fas fa-file-invoice me-1"></i>
+                                Payment Slip: {{ appointment.payment_slip.slip_number }}
+                            </small>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="detail-card">
+            <div class="card-header-custom">
+                <h5><i class="fas fa-user-injured"></i>Patient & Appointment Information</h5>
+            </div>
+            <div class="card-body-custom">
+                <div class="info-section">
+                    <h6>Patient Information</h6>
+                    <table class="info-table">
+                        <tr>
+                            <td><i class="fas fa-user me-2"></i>Name</td>
+                            <td>{{ appointment.patient_name }}</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-birthday-cake me-2"></i>Age</td>
+                            <td>{{ appointment.patient_age }} years</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-envelope me-2"></i>Email</td>
+                            <td>{{ appointment.patient_email }}</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-phone me-2"></i>Phone</td>
+                            <td>{{ appointment.patient_mobile }}</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-home me-2"></i>Address</td>
+                            <td>{{ appointment.patient_address }}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="info-section">
+                    <h6>Appointment Information</h6>
+                    <table class="info-table">
+                        <tr>
+                            <td><i class="fas fa-user-md me-2"></i>Doctor</td>
+                            <td>Dr. {{ appointment.doctor.get_full_name }}</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-calendar-alt me-2"></i>Date & Time</td>
+                            <td>{{ appointment.appointment_date|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-exclamation-triangle me-2"></i>Priority</td>
+                            <td><span class="priority-badge priority-{{ appointment.priority|lower }}">{{ appointment.get_priority_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-info-circle me-2"></i>Status</td>
+                            <td><span class="status-badge status-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-credit-card me-2"></i>Payment Status</td>
+                            <td>
+                                {% if appointment.payment_status == 'SUCCESSFUL' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i>Payment Complete
+                                    </span>
+                                {% elif appointment.payment_status == 'PENDING' %}
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Payment Pending
+                                    </span>
+                                {% elif appointment.payment_status == 'FAILED' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i>Payment Failed
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">
+                                        <i class="fas fa-question-circle me-1"></i>No Payment
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-clock me-2"></i>Booked On</td>
+                            <td>{{ appointment.created_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                {% if appointment.patient_notes %}
+                    <div class="notes-section">
+                        <h6><i class="fas fa-notes-medical"></i>Patient Notes</h6>
+                        <div class="notes-content">{{ appointment.patient_notes }}</div>
+                    </div>
+                {% endif %}
+                
+                {% if appointment.doctor_notes %}
+                    <div class="notes-section">
+                        <h6><i class="fas fa-stethoscope"></i>Doctor Notes</h6>
+                        <div class="notes-content">{{ appointment.doctor_notes }}</div>
+                    </div>
+                {% endif %}
+                
+                <!-- Payment Slip Section -->
+                {% if appointment.payment_slip %}
+                    <div class="medical-record-section">
+                        <h6><i class="fas fa-receipt"></i>Payment Slip</h6>
+                        <div class="medical-record-content">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Slip Number:</strong> {{ appointment.payment_slip.slip_number }}<br>
+                                    <strong>Transaction ID:</strong> {{ appointment.payment_slip.transaction_id }}<br>
+                                    <strong>Payment Method:</strong> 
+                                    {% if appointment.payment_slip.payment_method == 'CARD' %}
+                                        <i class="fas fa-credit-card me-1"></i>Credit/Debit Card
+                                    {% elif appointment.payment_slip.payment_method == 'UPI' %}
+                                        <i class="fas fa-mobile-alt me-1"></i>UPI
+                                    {% elif appointment.payment_slip.payment_method == 'NET_BANKING' %}
+                                        <i class="fas fa-university me-1"></i>Net Banking
+                                    {% endif %}<br>
+                                    <strong>Amount Paid:</strong> <span class="text-success">₹{{ appointment.payment_slip.amount }}</span><br>
+                                    <strong>Payment Date:</strong> {{ appointment.payment_slip.payment_date|date:"F d, Y" }} at {{ appointment.payment_slip.payment_date|time:"g:i A" }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Status:</strong> 
+                                    <span class="badge bg-success">{{ appointment.payment_slip.status }}</span><br><br>
+                                    {% if appointment.payment_slip.slip_file %}
+                                        <a href="{{ appointment.payment_slip.slip_file.url }}" 
+                                           class="btn btn-sm btn-info" 
+                                           target="_blank">
+                                            <i class="fas fa-download me-1"></i>Download Payment Slip
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Medical Reports Section (Only for Doctors) -->
+                {% if user.role == 'DOCTOR' %}
+                    <div class="reports-section">
+                        <h6><i class="fas fa-file-pdf"></i>Patient Medical Reports</h6>
+                        
+                        {% if medical_reports %}
+                            <div class="reports-list">
+                                {% for report in medical_reports %}
+                                    <div class="report-item">
+                                        <div class="report-info">
+                                            <div class="report-title">{{ report.title }}</div>
+                                            <div class="report-meta">
+                                                <span class="report-date">{{ report.report_date|date:"M d, Y" }}</span>
+                                                {% if report.description %}
+                                                    <span class="report-desc">{{ report.description|truncatewords:10 }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="report-actions">
+                                            {% if report.report_file %}
+                                                <a href="{{ report.report_file.url }}" target="_blank" class="btn-report btn-view-report">
+                                                    <i class="fas fa-eye"></i>View PDF
+                                                </a>
+                                                <a href="{{ report.report_file.url }}" download="{{ report.title }}.pdf" class="btn-report btn-download-report">
+                                                    <i class="fas fa-download"></i>Download
+                                                </a>
+                                            {% else %}
+                                                <div class="text-warning">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    No file attached
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                No medical reports found for this patient.
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {% if appointment.prescribed_medication %}
+                    <div class="notes-section">
+                        <h6><i class="fas fa-pills"></i>Prescribed Medication</h6>
+                        <div class="notes-content">{{ appointment.prescribed_medication }}</div>
+                    </div>
+                {% endif %}
+                
+                {% if appointment.follow_up_date %}
+                    <div class="notes-section">
+                        <h6><i class="fas fa-calendar-check"></i>Follow-up Date</h6>
+                        <div class="notes-content">
+                            <i class="fas fa-calendar me-2"></i>{{ appointment.follow_up_date|date:"M d, Y H:i" }}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    {% if user.role == 'PATIENT' %}
+                        {% if appointment.status == 'PENDING_PAYMENT' or appointment.payment_status != 'SUCCESSFUL' %}
+                            <div class="dropdown">
+                                <button class="btn-action btn-warning-action dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-credit-card"></i>Payment Options
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="paymentDropdown">
+                                    <li>
+                                        <a href="{% url 'appointments:mock_payment' appointment.pk %}" class="dropdown-item">
+                                            <i class="fas fa-credit-card me-2"></i>Pay Now & Schedule
+                                            <small class="text-muted">Complete payment immediately</small>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="{% url 'appointments:book_with_payment_later' appointment.pk %}" class="dropdown-item">
+                                            <i class="fas fa-clock me-2"></i>Book Now, Pay Later
+                                            <small class="text-muted">Schedule now, pay at appointment time</small>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        {% endif %}
+                        {% if appointment.can_cancel %}
+                            <a href="{% url 'appointments:cancel_appointment' appointment.pk %}" 
+                               class="btn-action btn-danger-action">
+                                <i class="fas fa-times"></i>Cancel
+                            </a>
+                        {% endif %}
+                        {% if appointment.status == 'COMPLETED' and not appointment.feedback %}
+                            <a href="{% url 'appointments:submit_feedback' appointment.pk %}" 
+                               class="btn-action btn-info-action">
+                                <i class="fas fa-star"></i>Feedback
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if user.role == 'DOCTOR' %}
+                        {% if appointment.status == 'PENDING' or appointment.status == 'SCHEDULED' %}
+                            <a href="{% url 'appointments:confirm_appointment' appointment.pk %}" 
+                               class="btn-action btn-success-action">
+                                <i class="fas fa-check"></i>Confirm Appointment
+                            </a>
+                            <a href="{% url 'appointments:cancel_appointment' appointment.pk %}" 
+                               class="btn-action btn-danger-action">
+                                <i class="fas fa-times"></i>Cancel
+                            </a>
+                        {% endif %}
+                        {% if appointment.status == 'SCHEDULED' and not appointment.medical_record %}
+                            <a href="{% url 'appointments:create_medical_record' appointment.pk %}" 
+                               class="btn-action btn-info-action">
+                                <i class="fas fa-notes-medical"></i>Medical Record
+                            </a>
+                        {% endif %}
+                        {% if appointment.status == 'COMPLETED' %}
+                            <a href="{% url 'appointments:update_patient_report' appointment.pk %}" 
+                               class="btn-action btn-warning-action">
+                                <i class="fas fa-file-medical"></i>Update Patient Report
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if user.role == 'ADMIN' %}
+                        {% if appointment.status == 'PENDING' %}
+                            <a href="{% url 'appointments:confirm_appointment' appointment.pk %}" 
+                               class="btn-action btn-success-action">
+                                <i class="fas fa-check"></i>Confirm
+                            </a>
+                            <a href="{% url 'appointments:cancel_appointment' appointment.pk %}" 
+                               class="btn-action btn-danger-action">
+                                <i class="fas fa-times"></i>Cancel
+                            </a>
+                        {% endif %}
+                        {% if appointment.status == 'SCHEDULED' %}
+                            <a href="{% url 'appointments:cancel_appointment' appointment.pk %}" 
+                               class="btn-action btn-danger-action">
+                                <i class="fas fa-times"></i>Cancel
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'appointments:my_appointments' %}" 
+                           class="btn-action btn-info-action">
+                            <i class="fas fa-history"></i>All Appointments
+                        </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Navigation Button -->
+                <div class="mt-3">
+                    <a href="{% url 'appointments:my_appointments' %}" 
+                       class="btn-action btn-secondary-action">
+                        <i class="fas fa-arrow-left"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Medical Record -->
+        {% if medical_record %}
+            <div class="detail-card medical-record-card" id="medicalRecord">
+                <div class="medical-record-header">
+                    <h5><i class="fas fa-file-medical"></i>Medical Record</h5>
+                    <button type="button" class="btn-print" onclick="printMedicalRecord()">
+                        <i class="fas fa-print"></i>Print Report
+                    </button>
+                </div>
+                <div class="medical-record-body">
+                    <div class="record-field">
+                        <div class="record-field-header">
+                            <i class="fas fa-microscope"></i>
+                            <h6>Diagnosis</h6>
+                        </div>
+                        <div class="record-field-content">{{ medical_record.diagnosis|default:"" }}</div>
+                    </div>
+                    
+                    <div class="record-field">
+                        <div class="record-field-header">
+                            <i class="fas fa-heartbeat"></i>
+                            <h6>Symptoms</h6>
+                        </div>
+                        <div class="record-field-content">{{ medical_record.symptoms|default:"" }}</div>
+                    </div>
+                    
+                    <div class="record-field">
+                        <div class="record-field-header">
+                            <i class="fas fa-prescription-bottle-medical"></i>
+                            <h6>Treatment</h6>
+                        </div>
+                        <div class="record-field-content">{{ medical_record.treatment|default:"" }}</div>
+                    </div>
+                    
+                    {% if medical_record.prescription %}
+                        <div class="record-field">
+                            <div class="record-field-header">
+                                <i class="fas fa-pills"></i>
+                                <h6>Prescription</h6>
+                            </div>
+                            <div class="record-field-content">{{ medical_record.prescription }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if medical_record.notes %}
+                        <div class="record-field">
+                            <div class="record-field-header">
+                                <i class="fas fa-clipboard-notes"></i>
+                                <h6>Doctor's Notes</h6>
+                            </div>
+                            <div class="record-field-content">{{ medical_record.notes }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="record-meta">
+                        {% if medical_record.next_visit_date %}
+                            <div class="record-meta-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Next Visit: {{ medical_record.next_visit_date|date:"F d, Y" }}</span>
+                            </div>
+                        {% endif %}
+                        {% if medical_record.created_at %}
+                            <div class="record-meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Recorded: {{ medical_record.created_at|date:"F d, Y" }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                function printMedicalRecord() {
+                    window.print();
+                }
+            </script>
+        {% endif %}
+        
+        <!-- Patient Feedback -->
+        {% if feedback %}
+            <div class="detail-card feedback-card">
+                <div class="card-header-custom">
+                    <h5><i class="fas fa-star"></i>Patient Feedback</h5>
+                </div>
+                <div class="card-body-custom">
+                    <div class="rating-display">
+                        <div class="rating-stars">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= feedback.rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="rating-text">{{ feedback.rating }}/5</div>
+                    </div>
+                    
+                    {% if feedback.comments %}
+                        <div class="info-section">
+                            <h6>Comments</h6>
+                            <div class="notes-content">{{ feedback.comments }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center">
+                        <span class="recommendation-badge {% if feedback.would_recommend %}recommendation-yes{% else %}recommendation-no{% endif %}">
+                            {% if feedback.would_recommend %}
+                                <i class="fas fa-thumbs-up me-1"></i>Would Recommend
+                            {% else %}
+                                <i class="fas fa-thumbs-down me-1"></i>Would Not Recommend
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

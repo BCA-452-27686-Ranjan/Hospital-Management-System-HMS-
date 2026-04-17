@@ -1,0 +1,1854 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to HMS - Modern Healthcare Management{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content animate-fadeInUp">
+                <h1 class="hero-title">Welcome to HMS</h1>
+                <p class="hero-subtitle">Your trusted partner in modern healthcare management. Streamlined, efficient, and patient-centered.</p>
+                {% if user.is_authenticated %}
+                    <div class="container mt-4">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="welcome-section">
+                                    <h2 class="welcome-title">
+                                        <i class="fas fa-heartbeat me-3"></i>
+                                        Welcome to HMS Dashboard
+                                    </h2>
+                                    <p class="welcome-subtitle">
+                                        {% if user.role == 'DOCTOR' %}
+                                            Manage your appointments and patient care efficiently
+                                        {% elif user.role == 'PATIENT' %}
+                                            Book appointments and manage your healthcare journey
+                                        {% elif user.role == 'ADMIN' %}
+                                            Oversee and manage the hospital management system
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="hero-actions">
+                        <a href="{% url 'accounts:login' %}" class="action-btn primary-btn">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </a>
+                        <a href="{% url 'accounts:simple_register' %}" class="action-btn secondary-btn">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual animate-slideInLeft">
+                    <div class="floating-card">
+                        <i class="fas fa-hospital-alt"></i>
+                    </div>
+                    <div class="floating-elements">
+                        <div class="floating-element element-1">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="floating-element element-2">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <div class="floating-element element-3">
+                            <i class="fas fa-pills"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- User Profile Section -->
+<!-- Quick Stats Section (for authenticated users) -->
+{% if user.is_authenticated %}
+<section class="stats-section py-3">
+    <div class="container">
+        <div class="row">
+            {% if user.role == 'ADMIN' %}
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp">
+                        <div class="feature-icon mb-2">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ total_patients }}">0</div>
+                        <div class="stat-label">Total Patients</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.1s;">
+                        <div class="feature-icon mb-2" style="background: var(--hms-gradient-secondary);">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ total_doctors }}">0</div>
+                        <div class="stat-label">Total Doctors</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.2s;">
+                        <div class="feature-icon mb-2" style="background: var(--hms-gradient-accent);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ total_appointments }}">0</div>
+                        <div class="stat-label">Total Appointments</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.3s;">
+                        <div class="feature-icon mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ today_appointments }}">0</div>
+                        <div class="stat-label">Today's Appointments</div>
+                    </div>
+                </div>
+            {% elif user.role == 'DOCTOR' %}
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp">
+                        <div class="feature-icon mb-2">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ today_appointments }}">0</div>
+                        <div class="stat-label">Today's Appointments</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.1s;">
+                        <div class="feature-icon mb-2" style="background: var(--hms-gradient-secondary);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ pending_appointments }}">0</div>
+                        <div class="stat-label">Pending Confirmation</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.2s;">
+                        <div class="feature-icon mb-2" style="background: var(--hms-gradient-accent);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ scheduled_appointments }}">0</div>
+                        <div class="stat-label">Scheduled</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.3s;">
+                        <div class="feature-icon mb-2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ completed_appointments }}">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                </div>
+            {% elif user.role == 'PATIENT' %}
+                <div class="col-md-4 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp">
+                        <div class="feature-icon mb-2">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ total_appointments }}">0</div>
+                        <div class="stat-label">Total Appointments</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.1s;">
+                        <div class="feature-icon mb-2" style="background: var(--hms-gradient-secondary);">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ upcoming_appointments }}">0</div>
+                        <div class="stat-label">Upcoming Appointments</div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-6 mb-3">
+                    <div class="stat-item animate-fadeInUp" style="animation-delay: 0.2s;">
+                        <div class="feature-icon mb-2" style="background: var(--hms-gradient-accent);">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-number counter" data-target="{{ completed_appointments }}">0</div>
+                        <div class="stat-label">Completed Visits</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">Why Choose HMS?</h2>
+            <p class="section-subtitle">Experience the future of healthcare management</p>
+            <div class="section-divider"></div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card animate-fadeInUp">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <div class="feature-icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Expert Doctors</h3>
+                    <p class="feature-description">Connect with qualified healthcare professionals across various specializations for comprehensive care.</p>
+                    <div class="feature-link">
+                        <a href="#" class="learn-more">
+                            Learn More <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card animate-fadeInUp" style="animation-delay: 0.1s;">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background: var(--hms-gradient-secondary);">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="feature-icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Easy Scheduling</h3>
+                    <p class="feature-description">Book appointments online with our intuitive scheduling system that works around your schedule.</p>
+                    <div class="feature-link">
+                        <a href="#" class="learn-more">
+                            Learn More <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card animate-fadeInUp" style="animation-delay: 0.2s;">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background: var(--hms-gradient-accent);">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="feature-icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Secure & Private</h3>
+                    <p class="feature-description">Your medical information is protected with state-of-the-art security and privacy measures.</p>
+                    <div class="feature-link">
+                        <a href="#" class="learn-more">
+                            Learn More <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4 mt-2">
+            <div class="col-md-4">
+                <div class="feature-card animate-fadeInUp" style="animation-delay: 0.3s;">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="feature-icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Mobile Friendly</h3>
+                    <p class="feature-description">Access your healthcare information anytime, anywhere with our responsive mobile design.</p>
+                    <div class="feature-link">
+                        <a href="#" class="learn-more">
+                            Learn More <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card animate-fadeInUp" style="animation-delay: 0.4s;">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background: var(--hms-gradient-primary);">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="feature-icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">24/7 Access</h3>
+                    <p class="feature-description">Manage your healthcare needs round the clock with our always-available platform.</p>
+                    <div class="feature-link">
+                        <a href="#" class="learn-more">
+                            Learn More <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="feature-card animate-fadeInUp" style="animation-delay: 0.5s;">
+                    <div class="feature-icon-wrapper">
+                        <div class="feature-icon" style="background: var(--hms-gradient-secondary);">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="feature-icon-bg"></div>
+                    </div>
+                    <h3 class="feature-title">Health Analytics</h3>
+                    <p class="feature-description">Track your health progress with comprehensive analytics and insights.</p>
+                    <div class="feature-link">
+                        <a href="#" class="learn-more">
+                            Learn More <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Enhanced Features CSS -->
+<style>
+.features-section {
+    padding: 4rem 0;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.features-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);
+}
+
+.section-header {
+    position: relative;
+    z-index: 2;
+}
+
+.section-title {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-bottom: 2rem;
+}
+
+.section-divider {
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0 auto;
+    border-radius: 2px;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s ease;
+    border: 1px solid rgba(0, 102, 204, 0.1);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.feature-card:hover::before {
+    transform: scaleX(1);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.feature-icon-wrapper {
+    position: relative;
+    margin-bottom: 2rem;
+    display: inline-block;
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.feature-icon-bg {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 25px;
+    opacity: 0.1;
+    z-index: 1;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.feature-card:hover .feature-icon-bg {
+    transform: scale(1.2);
+    opacity: 0.2;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+    transition: color 0.3s ease;
+}
+
+.feature-card:hover .feature-title {
+    color: #667eea;
+}
+
+.feature-description {
+    color: #64748b;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.feature-link {
+    margin-top: auto;
+}
+
+.learn-more {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.learn-more:hover {
+    color: #764ba2;
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(5px);
+    text-decoration: none;
+}
+
+.learn-more i {
+    transition: transform 0.3s ease;
+}
+
+.learn-more:hover i {
+    transform: translateX(3px);
+}
+
+@media (max-width: 768px) {
+    .features-section {
+        padding: 3rem 0;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 2rem;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+</style>
+    </div>
+</section>
+
+<!-- Dashboard Section (for authenticated users) -->
+{% if user.is_authenticated %}
+<section class="py-3">
+    <div class="container">
+        {% if user.role == 'ADMIN' %}
+            <!-- Admin Dashboard Preview -->
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-stream me-2"></i>Recent Activity</h5>
+                            <button class="btn btn-sm btn-outline-light" onclick="loadActivity()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="activity-feed" class="activity-feed">
+                                <div class="text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-3">
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'dashboard:admin_panel' %}" class="btn btn-primary">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
+                                </a>
+                                <a href="/admin/" class="btn btn-secondary">
+                                    <i class="fas fa-tools me-2"></i>Django Admin
+                                </a>
+                                <a href="{% url 'appointments:my_appointments' %}" class="btn btn-info">
+                                    <i class="fas fa-list me-2"></i>All Appointments
+                                </a>
+                                <button class="btn btn-success" onclick="showSupportModal()">
+                                    <i class="fas fa-headset me-2"></i>24×7 Support
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% elif user.role == 'DOCTOR' %}
+            <!-- Doctor Dashboard Preview -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user-md me-2"></i>Doctor Dashboard</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <i class="fas fa-user-md fa-4x text-primary mb-3"></i>
+                            <h3>Manage Your Practice</h3>
+                            <p class="text-muted">View appointments, manage your schedule, and access patient records</p>
+                            <div class="alert alert-info">
+                                <strong>Quick Actions:</strong> Use the navigation menu to access appointments, schedule management, and patient history.
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
+                                <a href="{% url 'appointments:doctor_dashboard' %}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-calendar me-2"></i>My Appointments
+                                </a>
+                                <a href="{% url 'appointments:manage_schedule' %}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-calendar-week me-2"></i>Manage Schedule
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Patient Dashboard Preview -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-lg">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-user me-2"></i>Patient Dashboard</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <i class="fas fa-user fa-4x text-primary mb-3"></i>
+                            <h3>Your Health Journey</h3>
+                            <p class="text-muted">Book appointments, track your visits, and manage your health records</p>
+                            <div class="alert alert-info">
+                                <strong>Get Started:</strong> Book your first appointment to experience quality healthcare management.
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
+                                <a href="{% url 'appointments:my_appointments' %}" class="btn btn-success btn-lg">
+                                    <i class="fas fa-list me-2"></i>View Appointments
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="py-3 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">Ready to Get Started?</h2>
+        <p class="lead mb-4">Join thousands of healthcare professionals and patients who trust HMS</p>
+        
+        {% if user.is_authenticated %}
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                {% if user.role == 'DOCTOR' %}
+                    <a href="{% url 'appointments:doctor_dashboard' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-calendar-check me-2"></i>View Appointments
+                    </a>
+                {% elif user.role == 'ADMIN' %}
+                    <a href="{% url 'dashboard:admin_panel' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
+                    </a>
+                {% endif %}
+                <button class="btn btn-outline-light btn-lg" onclick="showSupportModal()">
+                    <i class="fas fa-headset me-2"></i>Contact Support
+                </button>
+            </div>
+        {% else %}
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="{% url 'accounts:login' %}" class="btn btn-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login Now
+                </a>
+                <a href="{% url 'accounts:simple_register' %}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Register Today
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Support Modal -->
+<div class="modal fade" id="supportModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-headset me-2"></i>24×7 Support</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                    <h4>We're Here to Help!</h4>
+                    <p class="text-muted">Our support team is available 24/7 to assist you</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <i class="fas fa-phone fa-2x text-primary mb-2"></i>
+                                <h6>Phone Support</h6>
+                                <p class="mb-0"><strong>+1 234 567 8900</strong></p>
+                                <small class="text-muted">Available 24/7</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-envelope fa-2x text-success mb-2"></i>
+                                <h6>Email Support</h6>
+                                <p class="mb-0"><strong>support@hms.com</strong></p>
+                                <small class="text-muted">Response within 2 hours</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6>Support Hours</h6>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <strong>Monday - Friday</strong><br>
+                            8:00 AM - 8:00 PM
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Saturday</strong><br>
+                            9:00 AM - 6:00 PM
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Sunday</strong><br>
+                            10:00 AM - 4:00 PM
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Start Live Chat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced animations and interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate counters
+    const counters = document.querySelectorAll('.counter');
+    const speed = 200;
+    
+    counters.forEach(counter => {
+        const animate = () => {
+            const target = +counter.getAttribute('data-target');
+            const count = +counter.innerText;
+            const increment = target / speed;
+            
+            if (count < target) {
+                counter.innerText = Math.ceil(count + increment);
+                setTimeout(animate, 1);
+            } else {
+                counter.innerText = target;
+            }
+        }
+        
+        // Start animation when element is in viewport
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animate();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        observer.observe(counter);
+    });
+    
+    // Load activity for admin
+    loadActivity();
+});
+
+function loadActivity() {
+    const activityFeed = document.getElementById('activity-feed');
+    if (activityFeed) {
+        fetch('/dashboard/recent-activity/')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                if (data.activity && data.activity.length > 0) {
+                    data.activity.forEach(item => {
+                        const icon = item.type === 'appointment' ? 'fa-calendar' : 'fa-user';
+                        const color = item.status === 'Completed' ? 'success' : 
+                                      item.status === 'Scheduled' ? 'primary' : 'warning';
+                        
+                        html += '<div class="activity-item d-flex align-items-start mb-3 p-3 border rounded">' +
+                                '<div class="activity-icon me-3">' +
+                                '<i class="fas ' + icon + ' fa-lg text-' + color + '"></i>' +
+                                '</div>' +
+                                '<div class="activity-content flex-grow-1">' +
+                                '<div class="activity-message">' + item.message + '</div>' +
+                                '<div class="activity-time text-muted small">' +
+                                '<i class="fas fa-clock me-1"></i>' + item.time +
+                                '<span class="badge bg-' + color + ' ms-2">' + item.status + '</span>' +
+                                '</div>' +
+                                '</div>' +
+                                '</div>';
+                    });
+                } else {
+                    html = '<div class="text-center py-4 text-muted">No recent activity</div>';
+                }
+                activityFeed.innerHTML = html;
+            })
+            .catch(error => console.error('Error loading activity:', error));
+    }
+}
+
+function showSupportModal() {
+    const modal = new bootstrap.Modal(document.getElementById('supportModal'));
+    modal.show();
+}
+</script>
+
+<style>
+/* Additional styles for enhanced homepage */
+.hero-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,133.3C960,128,1056,96,1152,90.7C1248,85,1344,107,1392,117.3L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+    background-size: cover;
+}
+
+.hero-image i {
+    animation: pulse 3s infinite;
+}
+
+.user-welcome h4 {
+    font-family: var(--hms-font-secondary);
+    font-weight: 600;
+}
+
+.activity-item {
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background-color: var(--hms-gray-50);
+    transform: translateX(5px);
+}
+
+.welcome-avatar img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+}
+
+.avatar-placeholder i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .hero-section {
+        min-height: 60vh;
+        text-align: center;
+    }
+    
+    .hero-image {
+        margin-top: 2rem;
+    }
+    
+    .hero-image i {
+        font-size: 8rem !important;
+    }
+}
+
+/* Call-to-Action Section */
+.cta-section {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.cta-section::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    z-index: 2;
+}
+
+.cta-content {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    color: white;
+}
+
+.cta-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.cta-subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 2.5rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.cta-btn-primary {
+    background: white;
+    color: #667eea;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cta-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    color: #764ba2;
+    text-decoration: none;
+}
+
+.cta-btn-secondary {
+    background: transparent;
+    color: white;
+    padding: 1rem 2.5rem;
+    border: 2px solid white;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cta-btn-secondary:hover {
+    background: white;
+    color: #667eea;
+    transform: translateY(-3px);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .cta-section {
+        padding: 3rem 0;
+    }
+    
+    .cta-title {
+        font-size: 2rem;
+    }
+    
+    .cta-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-btn-primary,
+    .cta-btn-secondary {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+
+/* Profile Modal Styles - New Modern Design */
+.bg-pattern {
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+}
+
+.profile-cover {
+    height: 120px;
+    position: relative;
+    overflow: hidden;
+}
+
+.bg-gradient-branded {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+}
+
+.profile-avatar-container {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+    font-size: 2rem;
+}
+
+.avatar-ring {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 200%;
+    animation: ringRotate 3s linear infinite;
+    z-index: -1;
+}
+
+@keyframes ringRotate {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+
+.status-indicator.online {
+    background: #10b981;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 0.5rem;
+}
+
+.bg-gradient-role {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.25rem;
+}
+
+.profile-details-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.details-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.details-header h5 {
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.details-body {
+    padding: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.2s ease;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item:hover {
+    background: rgba(102, 126, 234, 0.02);
+    border-radius: 8px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.info-icon i {
+    font-size: 1rem;
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-content label {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.info-content span {
+    display: block;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.btn-action {
+    border-radius: 12px;
+    font-weight: 500;
+    padding: 0.75rem 1.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-action:hover::before {
+    left: 100%;
+}
+
+.btn-primary.btn-action {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-outline-primary.btn-action {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.btn-outline-primary.btn-action:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.modal-content {
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.modal-dialog.modal-xl {
+    max-width: 900px;
+}
+
+/* Compact Modal Styles */
+.compact-stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 0.8rem;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.compact-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.compact-stat-number {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.2rem;
+}
+
+.compact-details-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.compact-info-grid {
+    display: grid;
+    gap: 0.8rem;
+}
+
+.compact-info-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.compact-info-item:hover {
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.compact-info-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+
+.compact-info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.compact-info-content small {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.compact-info-content span {
+    display: block;
+    font-size: 0.9rem;
+    color: #1e293b;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.btn-compact {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-compact:hover {
+    transform: translateY(-1px);
+}
+
+/* Compact avatar */
+.profile-avatar-wrapper {
+    position: relative;
+    width: 90px;
+    height: 90px;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+    font-size: 2rem;
+}
+
+.avatar-ring {
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 200%;
+    animation: ringRotate 3s linear infinite;
+    z-index: -1;
+}
+
+/* Compact profile name */
+.profile-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 0.5rem;
+}
+
+/* Compact role badge */
+.bg-gradient-role {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0.4rem 1rem !important;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive adjustments for compact modal */
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+    
+    .compact-stat-card {
+        padding: 0.6rem;
+    }
+    
+    .compact-stat-number {
+        font-size: 1.2rem;
+    }
+    
+    .profile-avatar-wrapper {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .profile-name {
+        font-size: 1.3rem;
+    }
+    
+    .compact-info-item {
+        padding: 0.6rem;
+    }
+    
+    .compact-info-icon {
+        width: 32px;
+        height: 32px;
+        margin-right: 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Medical text styling */
+.medical-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Enhanced stat cards for larger modal */
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+    height: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+/* Enhanced details cards */
+.profile-details-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.profile-details-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.details-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 1.2rem 1.8rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.details-header h5 {
+    color: #475569;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.details-body {
+    padding: 1.2rem;
+}
+
+/* Enhanced info items */
+.info-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-item:hover {
+    background: rgba(102, 126, 234, 0.03);
+    border-radius: 8px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.info-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.2rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.info-item:hover .info-icon {
+    transform: scale(1.1);
+}
+
+.info-icon i {
+    font-size: 1.1rem;
+}
+
+.info-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.info-content label {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    font-weight: 600;
+}
+
+.info-content span {
+    display: block;
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+/* Enhanced action buttons */
+.btn-action {
+    border-radius: 12px;
+    font-weight: 500;
+    padding: 0.8rem 1.8rem;
+    transition: all 0.3s ease;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    min-height: 48px;
+}
+
+.btn-action::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn-action:hover::before {
+    left: 100%;
+}
+
+.btn-primary.btn-action {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-info.btn-action {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+}
+
+.btn-info.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4);
+}
+
+.btn-outline-primary.btn-action {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.btn-outline-primary.btn-action:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-3px);
+}
+
+/* Enhanced modal content */
+.modal-content {
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+/* Enhanced avatar for larger modal */
+.profile-avatar-wrapper {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.profile-avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: white;
+    border: 5px solid white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #667eea;
+    font-size: 2.5rem;
+}
+
+.avatar-ring {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 200%;
+    animation: ringRotate 3s linear infinite;
+    z-index: -1;
+}
+
+/* Enhanced profile name */
+.profile-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-top: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Enhanced role badge */
+.bg-gradient-role {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 0.6rem 1.2rem !important;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .modal-dialog.modal-xl {
+        max-width: 95%;
+        margin: 1rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+    
+    .profile-avatar-wrapper {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .profile-name {
+        font-size: 1.5rem;
+    }
+    
+    .info-item {
+        padding: 0.8rem 0;
+    }
+    
+    .info-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 1rem;
+    }
+}
+
+/* Enhanced floating button */
+.profile-trigger-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-trigger-btn::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    transform: rotate(45deg);
+    transition: all 0.5s ease;
+}
+
+.profile-trigger-btn:hover::before {
+    transform: rotate(45deg) translate(50%, 50%);
+}
+
+.profile-trigger-btn:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+.profile-trigger-btn:active {
+    transform: scale(0.95);
+}
+</style>
+
+<!-- Call-to-Action Section -->
+<section class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to Transform Your Healthcare Experience?</h2>
+            <p class="cta-subtitle">Join thousands of patients and healthcare professionals who trust HMS for seamless medical management.</p>
+            <div class="cta-buttons">
+                {% if user.is_authenticated %}
+                    {% if user.role == 'DOCTOR' %}
+                        <a href="{% url 'appointments:doctor_dashboard' %}" class="cta-btn-primary">
+                            <i class="fas fa-calendar-check"></i>
+                            My Appointments
+                        </a>
+                    {% elif user.role == 'PATIENT' %}
+                        <a href="{% url 'appointments:my_appointments' %}" class="cta-btn-primary">
+                            <i class="fas fa-calendar"></i>
+                            My Appointments
+                        </a>
+                    {% elif user.role == 'ADMIN' %}
+                        <a href="{% url 'dashboard:admin_panel' %}" class="cta-btn-primary">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Admin Panel
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{% url 'accounts:register' %}" class="cta-btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Get Started Now
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="cta-btn-secondary">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if user.is_authenticated %}
+{% endif %}
+
+{% endblock %}

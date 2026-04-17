@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Profile - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+.bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.compact-profile-container {
+    min-height: 60vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.compact-profile-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+    z-index: 1;
+    animation: floatingPatterns 20s ease-in-out infinite;
+}
+
+@keyframes floatingPatterns {
+    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(-20px, -20px) rotate(120deg); }
+    66% { transform: translate(20px, -10px) rotate(240deg); }
+}
+
+.compact-profile-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    width: 100%;
+    animation: slideInUp 0.8s ease, cardGlow 3s ease-in-out infinite;
+}
+
+@keyframes cardGlow {
+    0%, 100% { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1), 0 0 30px rgba(102, 126, 234, 0.1); }
+    50% { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 50px rgba(102, 126, 234, 0.2); }
+}
+
+.compact-profile-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.compact-profile-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    animation: titleShine 3s ease-in-out infinite;
+}
+
+@keyframes titleShine {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+.compact-profile-subtitle {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.compact-avatar-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.compact-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.compact-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.compact-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.avatar-ring {
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+    background-size: 200% 200%;
+    animation: ringRotate 3s linear infinite;
+    z-index: 1;
+}
+
+@keyframes ringRotate {
+    0% { transform: rotate(0deg); background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { transform: rotate(360deg); background-position: 0% 50%; }
+}
+
+.compact-avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 4px solid rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    color: white;
+    font-size: 3rem;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.compact-avatar-placeholder:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: #28a745;
+    border: 3px solid white;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    z-index: 3;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.compact-user-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 1rem 0 0.5rem 0;
+    animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.compact-role-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    animation: fadeInUp 0.8s ease 0.3s both;
+    position: relative;
+    overflow: hidden;
+}
+
+.compact-role-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    50%, 100% { left: 100%; }
+}
+
+.compact-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.compact-info-item {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease both;
+}
+
+.compact-info-item:nth-child(1) { animation-delay: 0.4s; }
+.compact-info-item:nth-child(2) { animation-delay: 0.5s; }
+.compact-info-item:nth-child(3) { animation-delay: 0.6s; }
+.compact-info-item:nth-child(4) { animation-delay: 0.7s; }
+.compact-info-item:nth-child(5) { animation-delay: 0.8s; }
+.compact-info-item:nth-child(6) { animation-delay: 0.9s; }
+
+.compact-info-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.compact-info-item:hover::before {
+    opacity: 1;
+}
+
+.compact-info-item:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+}
+
+.compact-info-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #667eea;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.compact-info-value {
+    font-size: 0.95rem;
+    color: #2c3e50;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.compact-action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeInUp 0.8s ease 1s both;
+}
+
+.btn-compact-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-compact-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn-compact-primary:hover::before {
+    left: 100%;
+}
+
+.btn-compact-primary:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-compact-secondary {
+    background: transparent;
+    color: #667eea;
+    border: 2px solid #667eea;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-compact-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #667eea;
+    transition: width 0.3s ease;
+    z-index: 0;
+}
+
+.btn-compact-secondary:hover::before {
+    width: 100%;
+}
+
+.btn-compact-secondary:hover {
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-compact-secondary i,
+.btn-compact-secondary span {
+    position: relative;
+    z-index: 1;
+}
+
+.btn-compact-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-compact-danger::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.btn-compact-danger:hover::before {
+    left: 100%;
+}
+
+.btn-compact-danger:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Floating particles effect */
+.floating-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.particle {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 15s infinite linear;
+}
+
+.particle:nth-child(1) { width: 4px; height: 4px; left: 10%; animation-delay: 0s; }
+.particle:nth-child(2) { width: 6px; height: 6px; left: 20%; animation-delay: 2s; }
+.particle:nth-child(3) { width: 3px; height: 3px; left: 30%; animation-delay: 4s; }
+.particle:nth-child(4) { width: 5px; height: 5px; left: 40%; animation-delay: 6s; }
+.particle:nth-child(5) { width: 4px; height: 4px; left: 50%; animation-delay: 8s; }
+.particle:nth-child(6) { width: 6px; height: 6px; left: 60%; animation-delay: 10s; }
+.particle:nth-child(7) { width: 3px; height: 3px; left: 70%; animation-delay: 12s; }
+.particle:nth-child(8) { width: 5px; height: 5px; left: 80%; animation-delay: 14s; }
+.particle:nth-child(9) { width: 4px; height: 4px; left: 90%; animation-delay: 16s; }
+
+@keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+}
+
+@media (max-width: 768px) {
+    .compact-profile-card {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .compact-avatar, .compact-avatar-placeholder {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .compact-user-name {
+        font-size: 1.3rem;
+    }
+    
+    .compact-action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-compact-primary, .btn-compact-secondary, .btn-compact-danger {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="compact-profile-container">
+    <div class="floating-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="compact-profile-card">
+        <div class="compact-profile-header">
+            <h1 class="compact-profile-title">My Profile</h1>
+            <p class="compact-profile-subtitle">Manage your personal information</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="compact-avatar-section">
+            <div class="compact-avatar-wrapper">
+                <!-- Debug: profile_image = {{ profile_image }} -->
+                {% if profile_image and profile_image != '/static/img/default-avatar.png' %}
+                    <img src="{{ profile_image }}" alt="Profile Picture" class="compact-avatar" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'; console.log('Profile image failed to load:', '{{ profile_image }}');">
+                    <div class="compact-avatar-placeholder" style="display: none;">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% else %}
+                    <div class="compact-avatar-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
+                {% endif %}
+                <div class="avatar-ring"></div>
+                <div class="status-indicator"></div>
+            </div>
+            
+            <h3 class="compact-user-name">{{ user.get_full_name|default:user.username }}</h3>
+            <span class="compact-role-badge">{{ user.get_role_display }}</span>
+        </div>
+
+        <div class="compact-info-grid">
+            <div class="compact-info-item">
+                <span class="compact-info-label">Username</span>
+                <span class="compact-info-value">{{ user.username }}</span>
+            </div>
+            
+            <div class="compact-info-item">
+                <span class="compact-info-label">Email</span>
+                <span class="compact-info-value">{{ user.email }}</span>
+            </div>
+            
+            {% if user.phone %}
+            <div class="compact-info-item">
+                <span class="compact-info-label">Phone</span>
+                <span class="compact-info-value">{{ user.phone }}</span>
+            </div>
+            {% endif %}
+            
+            {% if user.role == 'DOCTOR' and profile %}
+                {% if profile.specialization %}
+                <div class="compact-info-item">
+                    <span class="compact-info-label">Specialization</span>
+                    <span class="compact-info-value">{{ profile.get_specialization_display }}</span>
+                </div>
+                {% endif %}
+                
+                {% if profile.experience_years %}
+                <div class="compact-info-item">
+                    <span class="compact-info-label">Experience</span>
+                    <span class="compact-info-value">{{ profile.experience_years }} years</span>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            {% if user.role == 'PATIENT' and profile %}
+                {% if profile.blood_group %}
+                <div class="compact-info-item">
+                    <span class="compact-info-label">Blood Group</span>
+                    <span class="compact-info-value">{{ profile.blood_group }}</span>
+                </div>
+                {% endif %}
+                
+                {% if profile.emergency_contact_name %}
+                <div class="compact-info-item">
+                    <span class="compact-info-label">Emergency Contact</span>
+                    <span class="compact-info-value">{{ profile.emergency_contact_name }}</span>
+                </div>
+                {% endif %}
+            {% endif %}
+            
+            <div class="compact-info-item">
+                <span class="compact-info-label">Member Since</span>
+                <span class="compact-info-value">{{ user.date_joined|date:"M Y" }}</span>
+            </div>
+        </div>
+
+        <div class="compact-action-buttons">
+            <a href="{% url 'accounts:edit_profile' %}" class="btn-compact-primary">
+                <i class="fas fa-edit"></i>Edit Profile
+            </a>
+            <a href="{% url 'dashboard:home' %}" class="btn-compact-secondary">
+                <i class="fas fa-arrow-left"></i>Dashboard
+            </a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-compact-danger">
+                    <i class="fas fa-sign-out-alt"></i>Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

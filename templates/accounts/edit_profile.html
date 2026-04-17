@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="fas fa-user-edit me-2"></i>Edit Profile</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if user.role == 'DOCTOR' %}
+                        <!-- Doctor Profile Edit Form -->
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Profile Picture Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-camera me-2"></i>Profile Picture
+                                            </h6>
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3 text-center">
+                                                    <img src="{{ user.doctor_profile.get_profile_picture_url }}" 
+                                                         alt="Profile Picture" 
+                                                         class="img-fluid rounded-circle mb-3"
+                                                         style="max-width: 150px; height: 150px; object-fit: cover;"
+                                                         id="profilePreview">
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Upload Profile Picture</label>
+                                                        <input type="file" class="form-control" name="profile_picture" 
+                                                               accept="image/*" id="profilePictureInput">
+                                                        <small class="text-muted">
+                                                            Allowed formats: JPG, PNG, GIF. Max size: 5MB
+                                                        </small>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="remove_profile_picture" id="removeProfilePicture">
+                                                        <label class="form-check-label" for="removeProfilePicture">
+                                                            Remove current profile picture
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" name="first_name" 
+                                               value="{{ user.first_name }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" name="last_name" 
+                                               value="{{ user.last_name }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="{{ user.email }}" required readonly>
+                                <small class="text-muted">Email cannot be changed here</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" name="phone" 
+                                       value="{{ user.doctor_profile.phone }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Specialization</label>
+                                <select class="form-select" name="specialization" required>
+                                    <option value="">Select specialization</option>
+                                    <option value="CARD" {% if user.doctor_profile.specialization == 'CARD' %}selected{% endif %}>Cardiologist</option>
+                                    <option value="NEUR" {% if user.doctor_profile.specialization == 'NEUR' %}selected{% endif %}>Neurologist</option>
+                                    <option value="ORTH" {% if user.doctor_profile.specialization == 'ORTH' %}selected{% endif %}>Orthopedic</option>
+                                    <option value="PED" {% if user.doctor_profile.specialization == 'PED' %}selected{% endif %}>Pediatrician</option>
+                                    <option value="DERM" {% if user.doctor_profile.specialization == 'DERM' %}selected{% endif %}>Dermatologist</option>
+                                    <option value="GEN" {% if user.doctor_profile.specialization == 'GEN' %}selected{% endif %}>General Physician</option>
+                                    <option value="GYN" {% if user.doctor_profile.specialization == 'GYN' %}selected{% endif %}>Gynecologist</option>
+                                    <option value="OPH" {% if user.doctor_profile.specialization == 'OPH' %}selected{% endif %}>Ophthalmologist</option>
+                                    <option value="ENT" {% if user.doctor_profile.specialization == 'ENT' %}selected{% endif %}>ENT Specialist</option>
+                                    <option value="PSY" {% if user.doctor_profile.specialization == 'PSY' %}selected{% endif %}>Psychiatrist</option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Years of Experience</label>
+                                        <input type="number" class="form-control" name="experience_years" 
+                                               value="{{ user.doctor_profile.experience_years }}" min="0" max="50">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Consultation Fee</label>
+                                        <input type="number" class="form-control" name="consultation_fee" 
+                                               value="{{ user.doctor_profile.consultation_fee }}" min="0" step="0.01">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">License Number</label>
+                                <input type="text" class="form-control" name="license_number" 
+                                       value="{{ user.doctor_profile.license_number }}" readonly>
+                                <small class="text-muted">License number cannot be changed</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Verification Status</label>
+                                <div class="alert alert-info">
+                                    {% if user.doctor_profile.is_verified %}
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        <strong>Verified</strong> - Your account is fully verified
+                                    {% else %}
+                                        <i class="fas fa-clock me-2"></i>
+                                        <strong>Pending Verification</strong> - Admin will verify your credentials
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </form>
+
+                    {% elif user.role == 'PATIENT' %}
+                        <!-- Patient Profile Edit Form -->
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Profile Picture Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-camera me-2"></i>Profile Picture
+                                            </h6>
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3 text-center">
+                                                    <img src="{{ user.patient_profile.get_profile_picture_url }}" 
+                                                         alt="Profile Picture" 
+                                                         class="img-fluid rounded-circle mb-3"
+                                                         style="max-width: 150px; height: 150px; object-fit: cover;"
+                                                         id="profilePreview">
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Upload Profile Picture</label>
+                                                        <input type="file" class="form-control" name="profile_picture" 
+                                                               accept="image/*" id="profilePictureInput">
+                                                        <small class="text-muted">
+                                                            Allowed formats: JPG, PNG, GIF. Max size: 5MB
+                                                        </small>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="remove_profile_picture" id="removeProfilePicture">
+                                                        <label class="form-check-label" for="removeProfilePicture">
+                                                            Remove current profile picture
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" name="first_name" 
+                                               value="{{ user.first_name }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" name="last_name" 
+                                               value="{{ user.last_name }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="{{ user.email }}" required readonly>
+                                <small class="text-muted">Email cannot be changed here</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" name="phone" 
+                                       value="{{ user.patient_profile.emergency_contact_phone }}" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" name="date_of_birth" 
+                                               value="{{ user.date_of_birth|date:'Y-m-d' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Gender</label>
+                                        <select class="form-select" name="gender">
+                                            <option value="">Select gender</option>
+                                            <option value="M" {% if user.patient_profile.gender == 'M' %}selected{% endif %}>Male</option>
+                                            <option value="F" {% if user.patient_profile.gender == 'F' %}selected{% endif %}>Female</option>
+                                            <option value="O" {% if user.patient_profile.gender == 'O' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Blood Group</label>
+                                <select class="form-select" name="blood_group">
+                                    <option value="">Select blood group</option>
+                                    <option value="A+" {% if user.patient_profile.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if user.patient_profile.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if user.patient_profile.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if user.patient_profile.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if user.patient_profile.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if user.patient_profile.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if user.patient_profile.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if user.patient_profile.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Emergency Contact Name</label>
+                                        <input type="text" class="form-control" name="emergency_contact_name" 
+                                               value="{{ user.patient_profile.emergency_contact_name }}" 
+                                               placeholder="Emergency contact person">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Emergency Contact Phone</label>
+                                        <input type="tel" class="form-control" name="emergency_contact_phone" 
+                                               value="{{ user.patient_profile.emergency_contact_phone }}" 
+                                               placeholder="Emergency contact number">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Medical History</label>
+                                <textarea class="form-control" name="medical_history" rows="4" 
+                                          placeholder="Any relevant medical history...">{{ user.patient_profile.medical_history }}</textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Allergies</label>
+                                <textarea class="form-control" name="allergies" rows="3" 
+                                          placeholder="Any known allergies...">{{ user.patient_profile.allergies }}</textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </form>
+
+                    {% else %}
+                        <!-- Admin Profile Edit Form -->
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Profile Picture Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">
+                                                <i class="fas fa-camera me-2"></i>Profile Picture
+                                            </h6>
+                                            <div class="row align-items-center">
+                                                <div class="col-md-3 text-center">
+                                                    <img src="{{ user.get_profile_picture_url }}" 
+                                                         alt="Profile Picture" 
+                                                         class="img-fluid rounded-circle mb-3"
+                                                         style="max-width: 150px; height: 150px; object-fit: cover;"
+                                                         id="profilePreview">
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Upload Profile Picture</label>
+                                                        <input type="file" class="form-control" name="profile_picture" 
+                                                               accept="image/*" id="profilePictureInput">
+                                                        <small class="text-muted">
+                                                            Allowed formats: JPG, PNG, GIF. Max size: 5MB
+                                                        </small>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="remove_profile_picture" id="removeProfilePicture">
+                                                        <label class="form-check-label" for="removeProfilePicture">
+                                                            Remove current profile picture
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">First Name</label>
+                                        <input type="text" class="form-control" name="first_name" 
+                                               value="{{ user.first_name }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" name="last_name" 
+                                               value="{{ user.last_name }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="{{ user.email }}" required readonly>
+                                <small class="text-muted">Email cannot be changed here</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" name="username" 
+                                       value="{{ user.username }}" required readonly>
+                                <small class="text-muted">Username cannot be changed</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Role</label>
+                                <input type="text" class="form-control" name="role" 
+                                       value="{{ user.get_role_display }}" readonly>
+                                <small class="text-muted">Role cannot be changed</small>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Profile picture preview functionality
+document.getElementById('profilePictureInput').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('profilePreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+});
+
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('profilePictureInput');
+    const file = fileInput.files[0];
+    
+    if (file) {
+        // Check file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+            e.preventDefault();
+            alert('Profile picture must be smaller than 5MB.');
+            return false;
+        }
+        
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            e.preventDefault();
+            alert('Please select a valid image file.');
+            return false;
+        }
+    }
+});
+</script>
+
+<style>
+.rounded-circle {
+    border-radius: 50%;
+    border: 3px solid #dee2e6;
+}
+
+.card.bg-light {
+    background-color: #f8f9fa;
+}
+
+.card-title {
+    color: #495057;
+    font-weight: 600;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+</style>
+{% endblock %}

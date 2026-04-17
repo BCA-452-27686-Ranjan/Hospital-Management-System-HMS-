@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Schedule - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3>Manage Schedule</h3>
+                <span class="badge bg-primary fs-6">Dr. {{ user.get_full_name }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Weekly Schedule -->
+        <div class="col-md-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-calendar-week me-2"></i>Weekly Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                    <th>Max Patients</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for schedule in schedules %}
+                                    <tr data-day="{{ schedule.day_of_week }}">
+                                        <td>{{ schedule.get_day_of_week_display }}</td>
+                                        <td>{{ schedule.start_time }}</td>
+                                        <td>{{ schedule.end_time }}</td>
+                                        <td>{{ schedule.max_patients_per_day }}</td>
+                                        <td>
+                                            <span class="badge bg-{% if schedule.is_active %}success{% else %}secondary{% endif %}">
+                                                {% if schedule.is_active %}Active{% else %}Inactive{% endif %}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary edit-schedule-btn"
+                                                    data-day="{{ schedule.day_of_week }}"
+                                                    data-start="{{ schedule.start_time }}"
+                                                    data-end="{{ schedule.end_time }}"
+                                                    data-max="{{ schedule.max_patients_per_day }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">
+                                            No schedule set yet. Click "Add Schedule" to get started.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addScheduleModal">
+                            <i class="fas fa-plus me-2"></i>Add Schedule
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Holidays -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fas fa-calendar-times me-2"></i>Upcoming Holidays</h5>
+                </div>
+                <div class="card-body">
+                    {% if holidays %}
+                        {% for holiday in holidays %}
+                            <div class="alert alert-warning mb-2">
+                                <h6 class="mb-1">{{ holiday.reason|default:'Holiday' }}</h6>
+                                <p class="mb-1">
+                                    <small>
+                                        {{ holiday.start_date|date:"M d, Y" }} - 
+                                        {{ holiday.end_date|date:"M d, Y" }}
+                                    </small>
+                                </p>
+                                {% if holiday.is_recurring %}
+                                    <span class="badge bg-info">Recurring</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-check fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No upcoming holidays</p>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-3">
+                        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addHolidayModal">
+                            <i class="fas fa-plus me-2"></i>Add Holiday
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Schedule Modal -->
+<div class="modal fade" id="addScheduleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add/Update Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="scheduleForm">
+                    <div class="mb-3">
+                        <label class="form-label">Day of Week</label>
+                        <select class="form-select" name="day_of_week" required>
+                            <option value="">Select Day</option>
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Time</label>
+                                <input type="time" class="form-control" name="start_time" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">End Time</label>
+                                <input type="time" class="form-control" name="end_time" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Max Patients per Day</label>
+                        <input type="number" class="form-control" name="max_patients" value="10" min="1" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveSchedule()">Save Schedule</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Holiday Modal -->
+<div class="modal fade" id="addHolidayModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Holiday</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="holidayForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason</label>
+                        <input type="text" class="form-control" name="reason" placeholder="e.g., Annual Vacation">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_recurring" id="isRecurring">
+                            <label class="form-check-label" for="isRecurring">
+                                Recurring (Yearly)
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" onclick="saveHoliday()">Save Holiday</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function saveSchedule() {
+    const form = document.getElementById('scheduleForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "appointments:add_schedule" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function saveHoliday() {
+    const form = document.getElementById('holidayForm');
+    const formData = new FormData(form);
+    
+    fetch('{% url "appointments:add_holiday" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+}
+
+function editSchedule(day, startTime, endTime, maxPatients) {
+    document.querySelector('select[name="day_of_week"]').value = day;
+    document.querySelector('input[name="start_time"]').value = startTime;
+    document.querySelector('input[name="end_time"]').value = endTime;
+    document.querySelector('input[name="max_patients"]').value = maxPatients;
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('addScheduleModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

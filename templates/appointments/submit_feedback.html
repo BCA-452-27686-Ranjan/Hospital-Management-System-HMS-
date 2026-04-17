@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Feedback - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-star me-2"></i>Submit Feedback</h4>
+                        <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                           class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Appointment
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Appointment Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-calendar-check me-2"></i>Appointment Details</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.get_full_name }}</p>
+                                        <p><strong>Date:</strong> 
+                                            {% if appointment.appointment_date %}
+                                                {{ appointment.appointment_date|date:"F d, Y" }} at {{ appointment.appointment_date|time:"g:i A" }}
+                                            {% else %}
+                                                Not scheduled
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Status:</strong> 
+                                            <span class="badge bg-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span>
+                                        </p>
+                                        <p><strong>Payment Status:</strong> 
+                                            {% if appointment.payment_status == 'SUCCESSFUL' %}
+                                                <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Form -->
+                    <form method="post" id="feedbackForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-4">
+                                    <label class="form-label">
+                                        <i class="fas fa-star me-2"></i>How would you rate your appointment?
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="rating-input">
+                                        {% for i in "12345" %}
+                                            <input type="radio" id="star{{ forloop.counter }}" name="rating" value="{{ forloop.counter }}" class="d-none">
+                                            <label for="star{{ forloop.counter }}" class="star-label" data-rating="{{ forloop.counter }}">
+                                                <i class="fas fa-star"></i>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="form-text">Click on the stars to rate your experience</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="comments" class="form-label">
+                                        <i class="fas fa-comments me-2"></i>Additional Comments
+                                    </label>
+                                    <textarea name="comments" id="comments" class="form-control" rows="4" 
+                                              placeholder="Please share your experience with us..."></textarea>
+                                    <div class="form-text">Tell us more about your experience (optional)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-4">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="would_recommend" id="would_recommend" class="form-check-input">
+                                        <label for="would_recommend" class="form-check-label">
+                                            <i class="fas fa-thumbs-up me-2"></i>Would you recommend our services to others?
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                                       class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-info">
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0;
+        border: none;
+    }
+
+    .rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 5px;
+    }
+
+    .star-label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .star-label:hover,
+    .star-label:hover ~ .star-label {
+        color: #ffc107;
+    }
+
+    input[type="radio"]:checked ~ .star-label {
+        color: #ffc107;
+    }
+    
+    /* Fix for star selection */
+    .rating-input input[type="radio"]:checked + .star-label,
+    .rating-input input[type="radio"]:checked ~ .star-label {
+        color: #ffc107;
+    }
+
+    .form-control, .form-check-input {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .form-control:focus, .form-check-input:focus {
+        border-color: #17a2b8;
+        box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .form-check {
+        padding-left: 2rem;
+    }
+
+    .form-check-input {
+        margin-top: 0.25rem;
+    }
+
+    .form-check-label {
+        font-size: 1rem;
+        color: #495057;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle star rating
+    const stars = document.querySelectorAll('.star-label');
+    const ratingInput = document.querySelector('input[name="rating"]:checked');
+    
+    // Set initial rating if any
+    if (ratingInput) {
+        updateStars(parseInt(ratingInput.value));
+    }
+    
+    stars.forEach((star, index) => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            document.getElementById('star' + rating).checked = true;
+            updateStars(rating);
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            updateStars(rating);
+        });
+    });
+    
+    document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+        const checkedRating = document.querySelector('input[name="rating"]:checked');
+        if (checkedRating) {
+            updateStars(parseInt(checkedRating.value));
+        } else {
+            updateStars(0);
+        }
+    });
+    
+    function updateStars(rating) {
+        stars.forEach((star) => {
+            const starRating = parseInt(star.dataset.rating);
+            if (starRating <= rating) {
+                star.style.color = '#ffc107';
+            } else {
+                star.style.color = '#ddd';
+            }
+        });
+    }
+    
+    // Form validation
+    document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+        const rating = document.querySelector('input[name="rating"]:checked');
+        if (!rating) {
+            e.preventDefault();
+            alert('Please select a rating before submitting.');
+        }
+    });
+});
+</script>
+{% endblock %}

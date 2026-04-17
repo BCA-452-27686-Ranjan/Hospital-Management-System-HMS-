@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Confirmation - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Success Card -->
+            <div class="card shadow border-success">
+                <div class="card-header bg-success text-white text-center">
+                    <h5><i class="fas fa-check-circle me-2"></i>Payment Successful!</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Success Icon and Message -->
+                    <div class="text-center mb-4">
+                        <div class="success-icon mb-3">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h4 class="text-success">Thank You!</h4>
+                        <p class="text-muted">Your payment has been processed successfully.</p>
+                    </div>
+
+                    <!-- Payment Details -->
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-receipt me-2"></i>Payment Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Transaction ID:</strong><br>
+                                <code>{{ appointment.payment_transaction_id }}</code>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Amount Paid:</strong><br>
+                                <span class="h5 text-success">₹{{ appointment.payment_amount }}</span>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <strong>Payment Method:</strong><br>
+                                {% if appointment.payment_method == 'CARD' %}
+                                    <i class="fas fa-credit-card me-1"></i>Credit/Debit Card
+                                {% elif appointment.payment_method == 'UPI' %}
+                                    <i class="fas fa-mobile-alt me-1"></i>UPI
+                                {% elif appointment.payment_method == 'NET_BANKING' %}
+                                    <i class="fas fa-university me-1"></i>Net Banking
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Payment Time:</strong><br>
+                                {{ appointment.paid_at|date:"F d, Y" }} at {{ appointment.paid_at|time:"g:i A" }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appointment Details -->
+                    <div class="card border-light mb-4">
+                        <div class="card-header">
+                            <h6><i class="fas fa-calendar-check me-2"></i>Appointment Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Patient:</strong><br>
+                                    {{ appointment.patient_name }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Doctor:</strong><br>
+                                    Dr. {{ appointment.doctor.get_full_name }}
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <strong>Appointment Date:</strong><br>
+                                    {% if appointment.appointment_date %}
+                                        {{ appointment.appointment_date|date:"F d, Y" }}<br>
+                                        {{ appointment.appointment_date|time:"g:i A" }}
+                                    {% else %}
+                                        To be scheduled
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Status:</strong><br>
+                                    <span class="badge bg-{{ appointment.status|lower }} status-{{ appointment.status|lower }}">
+                                        {{ appointment.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-center">
+                        <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View Appointment
+                        </a>
+                        <button type="button" class="btn btn-success" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Payment Slip
+                        </button>
+                        {% if appointment.payment_slip and appointment.payment_slip.slip_file %}
+                            <a href="{% url 'appointments:print_payment_slip' appointment.pk %}" 
+                               class="btn btn-info" 
+                               target="_blank">
+                                <i class="fas fa-file-pdf me-2"></i>Download Official Slip
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'appointments:my_appointments' %}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-list me-2"></i>My Appointments
+                        </a>
+                        <a href="{% url 'dashboard:home' %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-home me-2"></i>Dashboard
+                        </a>
+                    </div>
+
+                    <!-- Important Notice -->
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                        <ul class="mb-0">
+                            <li>You will receive a confirmation email shortly.</li>
+                            <li>Please arrive 15 minutes before your appointment time.</li>
+                            <li>Bring your ID and any relevant medical documents.</li>
+                            <li>If you need to reschedule, please do so at least 24 hours in advance.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.success-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    animation: scaleIn 0.5s ease-in-out;
+}
+
+.success-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.border-success {
+    border: 2px solid #28a745 !important;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+code {
+    background-color: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.btn {
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Print-specific styles */
+@media print {
+    body {
+        background: white !important;
+        padding: 0 !important;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+    
+    .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+    
+    .card-header {
+        background: #f8f9fa !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .bg-success {
+        background: #28a745 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .text-success {
+        color: #28a745 !important;
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+    
+    .btn, .d-grid {
+        display: none !important;
+    }
+    
+    .alert-info {
+        display: none !important;
+    }
+    
+    h5, h6 {
+        color: #000 !important;
+    }
+    
+    .row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+    }
+    
+    .col-md-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+    
+    /* Ensure proper spacing in print */
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    
+    .mt-2 {
+        margin-top: 0.5rem !important;
+    }
+    
+    .mt-3 {
+        margin-top: 1rem !important;
+    }
+    
+    /* Add print header */
+    body::before {
+        content: "Hospital Management System - Payment Receipt";
+        display: block;
+        text-align: center;
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #000;
+    }
+    
+    /* Add print footer */
+    body::after {
+        content: "This is a computer-generated receipt. No signature required.";
+        display: block;
+        text-align: center;
+        font-size: 12px;
+        margin-top: 20px;
+        color: #666;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+    }
+}
+</style>
+
+<!-- Add print functionality -->
+<script>
+function printPaymentSlip() {
+    window.print();
+}
+
+// Auto-add print date/time when printing
+window.addEventListener('beforeprint', function() {
+    const printDate = new Date().toLocaleString();
+    const printInfo = document.createElement('div');
+    printInfo.innerHTML = `<small class="text-muted">Printed on: ${printDate}</small>`;
+    printInfo.style.cssText = 'text-align: center; margin-top: 10px; font-size: 12px;';
+    document.querySelector('.card-body').appendChild(printInfo);
+});
+
+// Clean up after printing
+window.addEventListener('afterprint', function() {
+    const printInfo = document.querySelector('.card-body small:last-child');
+    if (printInfo && printInfo.textContent.includes('Printed on:')) {
+        printInfo.remove();
+    }
+});
+</script>
+{% endblock %}

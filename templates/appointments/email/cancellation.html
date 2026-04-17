@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Cancelled</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #dc3545; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 20px; text-align: center; background: #f1f1f1; font-size: 12px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        .appointment-details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545; }
+        .detail-row { margin: 10px 0; }
+        .label { font-weight: bold; color: #555; }
+        .cancellation-box { background: #f8d7da; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>❌ Appointment Cancelled</h1>
+            <p>Your appointment has been cancelled</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear {{ patient.get_full_name|default:patient.username }},</p>
+            <p>Your appointment has been cancelled. Here are the details of the cancelled appointment:</p>
+            
+            <div class="appointment-details">
+                <div class="detail-row">
+                    <span class="label">Patient Name:</span> {{ appointment.patient_name }}
+                </div>
+                <div class="detail-row">
+                    <span class="label">Doctor:</span> Dr. {{ doctor.get_full_name }}
+                </div>
+                <div class="detail-row">
+                    <span class="label">Scheduled Date & Time:</span> {{ appointment.appointment_date|date:"F d, Y" }} at {{ appointment.appointment_date|date:"g:i A" }}
+                </div>
+                <div class="detail-row">
+                    <span class="label">Cancellation Date:</span> {% now "F d, Y" %}
+                </div>
+            </div>
+            
+            <div class="cancellation-box">
+                <h3>📝 Next Steps:</h3>
+                <p>If you need to reschedule your appointment, please:</p>
+                <ul>
+                    <li>Log into your HMS account</li>
+                    <li>Go to the Appointments section</li>
+                    <li>Click on "Book New Appointment"</li>
+                    <li>Or call us at (555) 123-4567 for assistance</li>
+                </ul>
+            </div>
+            
+            <p><strong>Need Assistance?</strong></p>
+            <p>
+                If you have any questions about this cancellation or need help rescheduling, 
+                please don't hesitate to contact our support team:
+            </p>
+            <p>
+                📞 Phone: (555) 123-4567<br>
+                📧 Email: support@hms.com<br>
+                💬 Live Chat: Available on our website
+            </p>
+            
+            <p style="text-align: center; margin: 20px 0;">
+                <a href="#" class="btn">Book New Appointment</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from Hospital Management System</p>
+            <p>© 2024 HMS. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

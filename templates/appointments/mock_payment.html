@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5><i class="fas fa-credit-card me-2"></i>Complete Your Payment</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Appointment Details -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-info-circle me-2"></i>Appointment Details</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Patient:</strong> {{ appointment.patient.get_full_name }}<br>
+                                        <strong>Doctor:</strong> Dr. {{ appointment.doctor.get_full_name }}<br>
+                                        <strong>Date:</strong> 
+                                        {% if appointment.appointment_date %}
+                                            {{ appointment.appointment_date|date:"F d, Y" }} at {{ appointment.appointment_date|time:"g:i A" }}
+                                        {% else %}
+                                            To be scheduled
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Consultation Fee:</strong> ₹{{ consultation_fee }}<br>
+                                        <strong>Status:</strong> <span class="badge bg-warning">{{ appointment.status }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form method="post" id="payment-form">
+                        {% csrf_token %}
+                        
+                        <!-- Payment Method Selection -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-wallet me-2"></i>Select Payment Method</h6>
+                            {% for choice in form.payment_method %}
+                                <div class="form-check mb-2">
+                                    {{ choice.tag }}
+                                    <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                        {% if 'CARD' in choice.tag %}
+                                            <i class="fas fa-credit-card me-1"></i>Credit/Debit Card
+                                        {% elif 'UPI' in choice.tag %}
+                                            <i class="fas fa-mobile-alt me-1"></i>UPI
+                                        {% elif 'NET_BANKING' in choice.tag %}
+                                            <i class="fas fa-university me-1"></i>Net Banking
+                                        {% endif %}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Card Payment Details -->
+                        <div id="card-details" class="payment-method-fields" style="display: none;">
+                            <div class="card border-light mb-3">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-credit-card me-2"></i>Card Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="{{ form.card_number.id_for_label }}" class="form-label">{{ form.card_number.label }}</label>
+                                        {{ form.card_number }}
+                                        {% if form.card_number.errors %}
+                                            <div class="text-danger">{{ form.card_number.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.card_expiry.id_for_label }}" class="form-label">{{ form.card_expiry.label }}</label>
+                                            {{ form.card_expiry }}
+                                            {% if form.card_expiry.errors %}
+                                                <div class="text-danger">{{ form.card_expiry.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label for="{{ form.card_cvv.id_for_label }}" class="form-label">{{ form.card_cvv.label }}</label>
+                                            {{ form.card_cvv }}
+                                            {% if form.card_cvv.errors %}
+                                                <div class="text-danger">{{ form.card_cvv.errors }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UPI Payment Details -->
+                        <div id="upi-details" class="payment-method-fields" style="display: none;">
+                            <div class="card border-light mb-3">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-mobile-alt me-2"></i>UPI Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="{{ form.upi_id.id_for_label }}" class="form-label">{{ form.upi_id.label }}</label>
+                                        {{ form.upi_id }}
+                                        {% if form.upi_id.errors %}
+                                            <div class="text-danger">{{ form.upi_id.errors }}</div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Enter your UPI ID (e.g., yourname@upi)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Banking Details -->
+                        <div id="net-banking-details" class="payment-method-fields" style="display: none;">
+                            <div class="card border-light mb-3">
+                                <div class="card-header">
+                                    <h6><i class="fas fa-university me-2"></i>Net Banking Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="{{ form.bank_name.id_for_label }}" class="form-label">{{ form.bank_name.label }}</label>
+                                        {{ form.bank_name }}
+                                        {% if form.bank_name.errors %}
+                                            <div class="text-danger">{{ form.bank_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="{{ form.account_number.id_for_label }}" class="form-label">{{ form.account_number.label }}</label>
+                                        {{ form.account_number }}
+                                        {% if form.account_number.errors %}
+                                            <div class="text-danger">{{ form.account_number.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pay Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-lock me-2"></i>Pay Now - ₹{{ consultation_fee }}
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Security Notice -->
+                    <div class="alert alert-warning mt-3">
+                        <h6><i class="fas fa-shield-alt me-2"></i>Security Notice</h6>
+                        <p class="mb-0">
+                            <strong>This is a mock payment system for demonstration purposes.</strong><br>
+                            No actual payment will be processed. This is only for testing the payment flow.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const paymentFields = {
+        'CARD': document.getElementById('card-details'),
+        'UPI': document.getElementById('upi-details'),
+        'NET_BANKING': document.getElementById('net-banking-details')
+    };
+
+    function showPaymentFields(method) {
+        // Hide all payment fields
+        Object.values(paymentFields).forEach(field => {
+            if (field) field.style.display = 'none';
+        });
+        
+        // Show selected payment fields
+        if (paymentFields[method]) {
+            paymentFields[method].style.display = 'block';
+        }
+    }
+
+    // Add event listeners to payment method radio buttons
+    paymentMethods.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                showPaymentFields(this.value);
+            }
+        });
+    });
+
+    // Show fields for initially selected method (if any)
+    const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+    if (selectedMethod) {
+        showPaymentFields(selectedMethod.value);
+    }
+
+    // Format card number input
+    const cardNumberInput = document.getElementById('card-number');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            if (formattedValue.length > 19) formattedValue = formattedValue.substring(0, 19);
+            e.target.value = formattedValue;
+        });
+    }
+
+    // Format expiry date input
+    const expiryInput = document.getElementById('card-expiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value;
+        });
+    }
+
+    // Only allow numbers for CVV
+    const cvvInput = document.getElementById('card-cvv');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '');
+        });
+    }
+});
+</script>
+
+<style>
+.payment-method-fields {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-check-input:checked + .form-check-label {
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+</style>
+{% endblock %}

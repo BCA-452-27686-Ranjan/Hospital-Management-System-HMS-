@@ -1,0 +1,953 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Appointment - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Enhanced appointment booking page styles */
+body {
+    padding-top: 0 !important;
+    background: #f8f9fa;
+}
+
+.appointment-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.appointment-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.15"/><circle cx="20" cy="60" r="0.5" fill="white" opacity="0.15"/><circle cx="80" cy="40" r="0.5" fill="white" opacity="0.15"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    z-index: 1;
+}
+
+.appointment-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 900px;
+}
+
+.appointment-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.appointment-header {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.appointment-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.appointment-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.appointment-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.appointment-body {
+    padding: 2rem;
+}
+
+.appointment-section {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.appointment-section:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.section-title {
+    color: #17a2b8;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #17a2b8;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+    transform: translateY(-1px);
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+    color: white;
+}
+
+.btn-secondary-custom {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.875rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-secondary-custom:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    color: white;
+}
+
+.input-group-text {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border: none;
+    border-radius: 10px 0 0 10px;
+}
+
+.qr-code {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    padding: 20px;
+    transition: transform 0.3s ease;
+}
+
+.qr-code:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .appointment-header h1 {
+        font-size: 2rem;
+    }
+    
+    .appointment-body {
+        padding: 1.5rem;
+    }
+    
+    .appointment-section {
+        padding: 1rem;
+    }
+}
+
+/* Loading spinner enhancements */
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.qr-code-container {
+    margin-top: 20px;
+}
+
+.qr-code {
+    display: inline-block;
+    padding: 15px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+    width: 150px;
+    height: 150px;
+}
+
+.qr-pattern {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 2px;
+    width: 100%;
+    height: 100%;
+}
+
+.qr-square {
+    width: 100%;
+    height: 100%;
+    border-radius: 2px;
+}
+
+.qr-black {
+    background: #000;
+}
+
+.qr-white {
+    background: #fff;
+}
+
+.qr-text {
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 12px;
+    color: #000;
+    border: 1px solid #ddd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="appointment-container">
+    <div class="appointment-wrapper">
+        <div class="appointment-card">
+            <div class="appointment-header">
+                <h1><i class="fas fa-calendar-plus me-3"></i>Book Your Appointment</h1>
+                <p>Schedule your consultation with our expert doctors</p>
+            </div>
+            
+            <div class="appointment-body">
+                {% if messages %}
+                    <div class="alert-container mb-4">
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <form method="post" id="appointmentForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Doctor Selection -->
+                    <div class="appointment-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user-md"></i>
+                            Select Your Doctor
+                        </h3>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.doctor.id_for_label }}" class="form-label">
+                                        Choose Doctor
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.doctor }}
+                                    {% if form.doctor.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.doctor.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text">Select a healthcare professional for your consultation</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Patient Information -->
+                    <div class="appointment-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-user"></i>
+                            Patient Information
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.patient_name.id_for_label }}" class="form-label">
+                                        Full Name
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.patient_name }}
+                                    {% if form.patient_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.patient_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.patient_age.id_for_label }}" class="form-label">
+                                        Age
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.patient_age }}
+                                    {% if form.patient_age.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.patient_age.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="{{ form.patient_phone.id_for_label }}" class="form-label">
+                                        Mobile Number
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.patient_phone }}
+                                    {% if form.patient_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.patient_phone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.patient_email.id_for_label }}" class="form-label">
+                                        Email Address
+                                    </label>
+                                    {{ form.patient_email }}
+                                    {% if form.patient_email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.patient_email.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.priority.id_for_label }}" class="form-label">
+                                        Priority Level
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.priority }}
+                                    {% if form.priority.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.priority.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text">Select the urgency of your appointment</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.patient_address.id_for_label }}" class="form-label">
+                                        Address
+                                    </label>
+                                    {{ form.patient_address }}
+                                    {% if form.patient_address.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.patient_address.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Visit Details -->
+                    <div class="appointment-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-notes-medical"></i>
+                            Visit Details
+                        </h3>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.reason.id_for_label }}" class="form-label">
+                                        Reason for Visit
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.reason }}
+                                    {% if form.reason.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.reason.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text">Please describe your symptoms or reason for consultation</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Important Information -->
+                    <div class="appointment-section">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong style="color: #0dcaf0;">Important Information:</strong>
+                            <p class="mb-0 mt-1">
+                                After submitting your request, the doctor will review and confirm the appointment date and time. 
+                                You will receive a notification once the appointment is scheduled.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'dashboard:home' %}" class="btn-secondary-custom">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <div>
+                            <button type="submit" class="btn-primary-custom" name="payment_option" value="pay_now">
+                                <i class="fas fa-credit-card me-2"></i>Pay Now & Book
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="payNowModal" tabindex="-1" aria-labelledby="payNowModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="payNowModalLabel">
+                    <i class="fas fa-credit-card me-2"></i>Complete Payment & Book Appointment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="mb-3"><i class="fas fa-calendar-check me-2"></i>Appointment Summary</h6>
+                        <div id="appointmentSummary">
+                            <p class="text-muted">Please review your appointment details before payment.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="mb-3"><i class="fas fa-payment me-2"></i>Payment Information</h6>
+                        <form id="paymentForm">
+                            <div class="mb-3">
+                                <label for="paymentMethod" class="form-label">Payment Method</label>
+                                <select class="form-select" id="paymentMethod" name="payment_method" required>
+                                    <option value="">Select Payment Method</option>
+                                    <option value="CARD">Credit/Debit Card</option>
+                                    <option value="UPI">UPI</option>
+                                    <option value="NET_BANKING">Net Banking</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Card Details -->
+                            <div id="cardDetails" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="cardNumber" class="form-label">Card Number</label>
+                                    <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="expiryDate" class="form-label">Expiry Date</label>
+                                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="cvv" class="form-label">CVV</label>
+                                            <input type="text" class="form-control" id="cvv" placeholder="123" maxlength="3">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- UPI Details -->
+                            <div id="upiDetails" style="display: none;">
+                                <div class="mb-4">
+                                    <label for="upiId" class="form-label fw-bold">
+                                        <i class="fas fa-mobile-alt me-2"></i>Enter UPI ID
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-wallet"></i>
+                                        </span>
+                                        <input type="text" class="form-control form-control-lg" id="upiId" 
+                                               placeholder="yourname@upi" required>
+                                    </div>
+                                    <small class="text-muted">Enter your UPI ID (e.g., mobilenumber@upi, username@paytm)</small>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <div class="qr-code-container">
+                                        <div class="qr-code">
+                                            <div class="qr-pattern">
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                                <div class="qr-square qr-black"></div>
+                                                <div class="qr-square qr-white"></div>
+                                            </div>
+                                            <div class="qr-text">₹500</div>
+                                        </div>
+                                        <p class="mt-2 mb-0"><strong>Scan QR Code</strong></p>
+                                        <p class="mb-0"><small class="text-muted">Or use UPI ID above</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Net Banking Details -->
+                            <div id="netBankingDetails" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="bankName" class="form-label">Select Bank</label>
+                                    <select class="form-select" id="bankName">
+                                        <option value="">Select Your Bank</option>
+                                        <option value="SBI">State Bank of India</option>
+                                        <option value="HDFC">HDFC Bank</option>
+                                        <option value="ICICI">ICICI Bank</option>
+                                        <option value="PNB">Punjab National Bank</option>
+                                        <option value="AXIS">Axis Bank</option>
+                                        <option value="KOTAK">Kotak Mahindra Bank</option>
+                                        <option value="BOB">Bank of Baroda</option>
+                                        <option value="CANARA">Canara Bank</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="accountHolderName" class="form-label">Account Holder Name</label>
+                                    <input type="text" class="form-control" id="accountHolderName" placeholder="Enter account holder name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="accountNumber" class="form-label">Account Number</label>
+                                    <input type="text" class="form-control" id="accountNumber" placeholder="Enter account number" maxlength="20">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ifscCode" class="form-label">IFSC Code</label>
+                                    <input type="text" class="form-control" id="ifscCode" placeholder="Enter IFSC code" maxlength="11" style="text-transform: uppercase;">
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <small>Your bank details are secure and will only be used for this transaction.</small>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn-primary" id="confirmPaymentBtn">
+                    <i class="fas fa-check me-2"></i>Confirm Payment & Book
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add form validation styling
+    const form = document.getElementById('appointmentForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    // Special handling for age field to prevent negative values
+    const ageField = document.getElementById('id_patient_age');
+    if (ageField) {
+        ageField.addEventListener('input', function() {
+            // Remove any negative sign and ensure positive value
+            let value = this.value.replace(/[^0-9]/g, '');
+            if (value && parseInt(value) < 0) {
+                value = Math.abs(parseInt(value)).toString();
+            }
+            this.value = value;
+        });
+        
+        ageField.addEventListener('blur', function() {
+            // Validate age range (1-120)
+            let value = parseInt(this.value);
+            if (isNaN(value) || value < 1) {
+                this.value = '';
+                this.classList.add('is-invalid');
+            } else if (value > 120) {
+                this.value = '120';
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    }
+    
+    inputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.checkValidity()) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.remove('is-valid');
+                this.classList.add('is-invalid');
+            }
+        });
+    });
+    
+    // Payment method change handler
+    const paymentMethod = document.getElementById('paymentMethod');
+    const cardDetails = document.getElementById('cardDetails');
+    const upiDetails = document.getElementById('upiDetails');
+    const netBankingDetails = document.getElementById('netBankingDetails');
+    
+    paymentMethod.addEventListener('change', function() {
+        // Hide all payment details
+        cardDetails.style.display = 'none';
+        upiDetails.style.display = 'none';
+        netBankingDetails.style.display = 'none';
+        
+        // Show relevant payment details
+        if (this.value === 'CARD') {
+            cardDetails.style.display = 'block';
+        } else if (this.value === 'UPI') {
+            upiDetails.style.display = 'block';
+        } else if (this.value === 'NET_BANKING') {
+            netBankingDetails.style.display = 'block';
+        }
+    });
+    
+    // Pay Now button click handler
+    const payNowBtn = document.querySelector('[data-bs-target="#payNowModal"]');
+    const confirmPaymentBtn = document.getElementById('confirmPaymentBtn');
+    
+    payNowBtn.addEventListener('click', function() {
+        // Validate the appointment form first
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+        
+        // Debug: Log form data
+        console.log('Form data before modal:');
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ': ' + value);
+        }
+        
+        // Generate appointment summary
+        generateAppointmentSummary();
+    });
+    
+    // Confirm payment button handler
+    confirmPaymentBtn.addEventListener('click', function() {
+        const paymentForm = document.getElementById('paymentForm');
+        
+        // Validate payment form
+        if (!paymentMethod.value) {
+            alert('Please select a payment method');
+            return;
+        }
+        
+        // Validate specific payment method fields
+        if (paymentMethod.value === 'CARD') {
+            const cardNumber = document.getElementById('cardNumber');
+            const expiryDate = document.getElementById('expiryDate');
+            const cvv = document.getElementById('cvv');
+            
+            if (!cardNumber.value || !expiryDate.value || !cvv.value) {
+                alert('Please fill in all card details');
+                return;
+            }
+        } else if (paymentMethod.value === 'UPI') {
+            const upiId = document.getElementById('upiId');
+            if (!upiId.value) {
+                alert('Please enter UPI ID');
+                return;
+            }
+        } else if (paymentMethod.value === 'NET_BANKING') {
+            const bankName = document.getElementById('bankName');
+            const accountHolderName = document.getElementById('accountHolderName');
+            const accountNumber = document.getElementById('accountNumber');
+            const ifscCode = document.getElementById('ifscCode');
+            
+            if (!bankName.value || !accountHolderName.value || !accountNumber.value || !ifscCode.value) {
+                alert('Please fill in all banking details');
+                return;
+            }
+        }
+        
+        // Simulate payment processing
+        this.disabled = true;
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+        
+        // Submit form data via AJAX to validate and store in session
+        const formData = new FormData(form);
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.show_payment) {
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('payNowModal'));
+                modal.hide();
+                
+                // Redirect to payment page (opens in same window, can be configured as popup)
+                window.location.href = '/appointments/process-payment/';
+            } else {
+                // Show error
+                alert('Error: ' + (data.error || 'Failed to process appointment'));
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-lock me-2"></i>Confirm Payment & Book';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+            this.disabled = false;
+            this.innerHTML = '<i class="fas fa-lock me-2"></i>Confirm Payment & Book';
+        });
+        
+        // Helper function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+    
+    // Generate appointment summary
+    function generateAppointmentSummary() {
+        const summaryDiv = document.getElementById('appointmentSummary');
+        const doctorSelect = form.querySelector('#id_doctor');
+        const patientName = form.querySelector('#id_patient_name');
+        const patientAge = form.querySelector('#id_patient_age');
+        const patientPhone = form.querySelector('#id_patient_phone');
+        const reason = form.querySelector('#id_reason');
+        const priority = form.querySelector('#id_priority');
+        
+        let summaryHTML = `
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user-md me-2"></i>Doctor</h6>
+                    <p class="card-text">${doctorSelect.options[doctorSelect.selectedIndex].text}</p>
+                </div>
+            </div>
+            <div class="card bg-light mt-2">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-user me-2"></i>Patient Details</h6>
+                    <p class="card-text mb-1"><strong>Name:</strong> ${patientName.value}</p>
+                    <p class="card-text mb-1"><strong>Age:</strong> ${patientAge.value} years</p>
+                    <p class="card-text mb-1"><strong>Phone:</strong> ${patientPhone.value}</p>
+                </div>
+            </div>
+            <div class="card bg-light mt-2">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-notes-medical me-2"></i>Visit Details</h6>
+                    <p class="card-text mb-1"><strong>Reason:</strong> ${reason.value}</p>
+                    <p class="card-text mb-1"><strong>Priority:</strong> ${priority.options[priority.selectedIndex].text}</p>
+                </div>
+            </div>
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Consultation Fee: ₹500</strong><br>
+                <small class="text-muted">Payment will be processed securely</small>
+            </div>
+        `;
+        
+        summaryDiv.innerHTML = summaryHTML;
+    }
+    
+    // Remove form submission validation to let Django handle it
+    // form.addEventListener('submit', function(e) {
+    //     console.log('Form submission triggered');
+    //     
+    //     let isValid = true;
+    //     const requiredFields = form.querySelectorAll('[required]');
+    //     
+    //     console.log('Required fields found:', requiredFields.length);
+    //     
+    //     requiredFields.forEach(field => {
+    //         if (!field.value.trim()) {
+    //             field.classList.add('is-invalid');
+    //             isValid = false;
+    //             console.log('Missing required field:', field.name);
+    //         } else {
+    //             field.classList.remove('is-invalid');
+    //         }
+    //     });
+    //     
+    //     // Also check for essential fields that might not have required attribute
+    //     const essentialFields = ['id_doctor', 'id_patient_name', 'id_patient_age', 'id_patient_phone', 'id_reason'];
+    //     essentialFields.forEach(fieldId => {
+    //         const field = document.getElementById(fieldId);
+    //         if (field && !field.value.trim()) {
+    //             field.classList.add('is-invalid');
+    //             isValid = false;
+    //             console.log('Missing essential field:', fieldId);
+    //         }
+    //     });
+    //     
+    //     console.log('Form validation result:', isValid);
+    //     
+    //     if (!isValid) {
+    //         e.preventDefault();
+    //         
+    //         // Show error message
+    //         const errorDiv = document.createElement('div');
+    //         errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+    //         errorDiv.innerHTML = `
+    //             <i class="fas fa-exclamation-triangle me-2"></i>
+    //             Please fill in all required fields marked with *.
+    //             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    //         `;
+    //         
+    //         const existingAlert = form.querySelector('.alert-danger');
+    //         if (existingAlert) {
+    //             existingAlert.remove();
+    //         }
+    //         
+    //         form.insertBefore(errorDiv, form.firstChild);
+    //         
+    //         // Scroll to top
+    //         window.scrollTo({ top: 0, behavior: 'smooth' });
+    //     } else {
+    //         console.log('Form is valid, submitting...');
+    //     }
+    // });
+    
+    console.log('Form validation disabled - Django will handle validation');
+});
+</script>
+{% endblock %}

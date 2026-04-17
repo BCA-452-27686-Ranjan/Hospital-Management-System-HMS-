@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Update Patient Report - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-file-medical me-2"></i>Update Patient Report</h4>
+                        <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                           class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Appointment
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Patient Information -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-user me-2"></i>Patient Information</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Patient:</strong> {{ appointment.patient_name }}</p>
+                                        <p><strong>Email:</strong> {{ appointment.patient_email }}</p>
+                                        <p><strong>Phone:</strong> {{ appointment.patient_phone }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Appointment Date:</strong> 
+                                            {% if appointment.appointment_date %}
+                                                {{ appointment.appointment_date|date:"F d, Y" }} at {{ appointment.appointment_date|time:"g:i A" }}
+                                            {% else %}
+                                                Not scheduled
+                                            {% endif %}
+                                        </p>
+                                        <p><strong>Status:</strong> 
+                                            <span class="badge bg-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Update Report Form -->
+                    <form method="post" id="updateReportForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.diagnosis.id_for_label }}" class="form-label">
+                                        <i class="fas fa-stethoscope me-2"></i>Diagnosis
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.diagnosis }}
+                                    {% if form.diagnosis.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.diagnosis.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Enter the diagnosis for the patient</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.symptoms.id_for_label }}" class="form-label">
+                                        <i class="fas fa-notes-medical me-2"></i>Symptoms
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.symptoms }}
+                                    {% if form.symptoms.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.symptoms.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Describe the symptoms observed</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.treatment.id_for_label }}" class="form-label">
+                                        <i class="fas fa-medkit me-2"></i>Treatment
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.treatment }}
+                                    {% if form.treatment.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.treatment.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">Describe the treatment provided</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="{{ form.prescription.id_for_label }}" class="form-label">
+                                        <i class="fas fa-pills me-2"></i>Prescription
+                                    </label>
+                                    {{ form.prescription }}
+                                    {% if form.prescription.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.prescription.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">List prescribed medications (optional)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Existing Report Information -->
+                        {% if appointment.medical_record %}
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="alert alert-warning">
+                                        <h6><i class="fas fa-info-circle me-2"></i>Existing Report</h6>
+                                        <p class="mb-0">You are updating an existing patient report. The current information will be replaced with your updates.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'appointments:appointment_detail' appointment.pk %}" 
+                                       class="btn btn-secondary">
+                                        <i class="fas fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-save me-2"></i>Update Report
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-radius: 15px 15px 0 0;
+        border: none;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+        padding: 0.75rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #ffc107;
+        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+    }
+
+    .btn {
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+
+    .invalid-feedback {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add Bootstrap classes to form fields
+    const formFields = {
+        '{{ form.diagnosis.id_for_label }}': 'form-control',
+        '{{ form.symptoms.id_for_label }}': 'form-control',
+        '{{ form.treatment.id_for_label }}': 'form-control',
+        '{{ form.prescription.id_for_label }}': 'form-control'
+    };
+
+    Object.keys(formFields).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.add(...formFields[fieldId].split(' '));
+        }
+    });
+
+    // Add textarea class and rows to textareas
+    const textareas = ['{{ form.diagnosis.id_for_label }}', '{{ form.symptoms.id_for_label }}', '{{ form.treatment.id_for_label }}', '{{ form.prescription.id_for_label }}'];
+    
+    textareas.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && field.tagName === 'TEXTAREA') {
+            field.classList.add('form-control');
+            field.rows = 4;
+        }
+    });
+});
+</script>
+{% endblock %}

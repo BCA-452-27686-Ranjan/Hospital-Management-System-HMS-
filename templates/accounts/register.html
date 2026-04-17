@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Fix navbar overlap for register page */
+body {
+    padding-top: 0 !important;
+}
+
+.register-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.register-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+}
+
+.register-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    z-index: 2;
+}
+
+.register-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    padding: 3rem;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 10;
+    max-width: 800px;
+    width: 100%;
+    animation: slideInUp 0.8s ease;
+}
+
+.register-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.register-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.register-icon i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.register-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.register-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.form-control {
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background: white;
+}
+
+.btn-register {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.btn-register:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.btn-register:active {
+    transform: translateY(-1px);
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.login-link p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.login-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.login-link a:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@media (max-width: 768px) {
+    .register-card {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    .register-title {
+        font-size: 2rem;
+    }
+    
+    .register-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .register-icon i {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <div class="register-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2 class="register-title">Create Account</h2>
+            <p class="register-subtitle">Join our Hospital Management System</p>
+        </div>
+        
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-2"></i>Username
+                    </label>
+                    <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" 
+                           class="form-control" placeholder="Choose a username" required>
+                    {% if form.username.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.username.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        <i class="fas fa-envelope me-2"></i>Email Address
+                    </label>
+                    <input type="email" name="{{ form.email.name }}" id="{{ form.email.id_for_label }}" 
+                           class="form-control" placeholder="Enter your email" required>
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.email.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-2"></i>First Name
+                    </label>
+                    <input type="text" name="{{ form.first_name.name }}" id="{{ form.first_name.id_for_label }}" 
+                           class="form-control" placeholder="Enter your first name" required>
+                    {% if form.first_name.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.first_name.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-2"></i>Last Name
+                    </label>
+                    <input type="text" name="{{ form.last_name.name }}" id="{{ form.last_name.id_for_label }}" 
+                           class="form-control" placeholder="Enter your last name" required>
+                    {% if form.last_name.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.last_name.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="{{ form.phone.id_for_label }}" class="form-label">
+                    <i class="fas fa-phone me-2"></i>Phone Number
+                </label>
+                <input type="tel" name="{{ form.phone.name }}" id="{{ form.phone.id_for_label }}" 
+                       class="form-control" placeholder="Enter your phone number">
+                {% if form.phone.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.phone.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Password
+                    </label>
+                    <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}" 
+                           class="form-control" placeholder="Create a password" required>
+                    {% if form.password1.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.password1.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Confirm Password
+                    </label>
+                    <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}" 
+                           class="form-control" placeholder="Confirm your password" required>
+                    {% if form.password2.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.password2.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-register">
+                    <i class="fas fa-user-plus me-2"></i>Create Account
+                </button>
+            </div>
+        </form>
+        
+        <div class="login-link">
+            <p>Already have an account?</p>
+            <a href="{% url 'accounts:login' %}">
+                <i class="fas fa-sign-in-alt me-2"></i>Login here
+                <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add animation to form inputs
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    });
+    
+    // Add loading state to submit button
+    const form = document.querySelector('form');
+    const submitBtn = document.querySelector('.btn-register');
+    
+    form.addEventListener('submit', function() {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+    });
+});
+</script>
+{% endblock %}

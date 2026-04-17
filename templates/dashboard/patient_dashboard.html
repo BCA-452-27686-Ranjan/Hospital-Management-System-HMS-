@@ -1,0 +1,1582 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Dashboard - HMS{% endblock %}
+
+{% block extra_css %}
+<style>
+.patient-dashboard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 280px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow-y: auto;
+    position: fixed;
+    height: 100vh;
+    z-index: 1000;
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+}
+
+.patient-profile {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 2rem;
+    color: #667eea;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+}
+
+.patient-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.patient-id {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.sidebar-menu {
+    padding: 1rem 0;
+}
+
+.menu-item {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: #333;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    position: relative;
+}
+
+.menu-item:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-left-color: #667eea;
+    color: #667eea;
+}
+
+.menu-item.active {
+    background: rgba(102, 126, 234, 0.15);
+    border-left-color: #764ba2;
+    color: #764ba2;
+    font-weight: 600;
+}
+
+.menu-item i {
+    width: 24px;
+    margin-right: 1rem;
+    text-align: center;
+}
+
+/* Main Content Area */
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.welcome-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-title {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.quick-action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-success-gradient {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.btn-success-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.card-title i {
+    color: #667eea;
+}
+
+/* Appointment Cards */
+.appointment-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #667eea;
+    transition: all 0.3s ease;
+}
+
+.appointment-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.appointment-time {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.appointment-doctor {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.appointment-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-confirmed {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-completed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Health Stats */
+.health-stat {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    margin-bottom: 1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Medical Records */
+.record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.record-item:hover {
+    background: #e9ecef;
+}
+
+.record-info {
+    flex: 1;
+}
+
+.record-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.record-date {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.record-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-view {
+    background: #667eea;
+    color: white;
+}
+
+.btn-download {
+    background: #28a745;
+    color: white;
+}
+
+/* Billing Section */
+.bill-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #28a745;
+}
+
+.bill-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.bill-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Medicine Reminder */
+.medicine-reminder {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #ffc107;
+}
+
+.medicine-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.medicine-time {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.medicine-dose {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* SOS Button */
+.sos-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    animation: pulse 2s infinite;
+}
+
+.sos-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 15px 40px rgba(220, 53, 69, 0.4);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.active {
+        transform: translateX(0);
+    }
+    
+    .main-content {
+        margin-left: 0;
+        padding: 1rem;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .welcome-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .quick-actions {
+        justify-content: center;
+    }
+}
+
+/* Chart Container */
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    height: 300px;
+    position: relative;
+}
+
+/* Loading Animation */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Notification Badge */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="patient-dashboard">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="patient-profile">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="patient-name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="patient-id">ID: PAT-{{ user.id|stringformat:"05d" }}</div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <a href="#overview" class="menu-item active" onclick="showSection('overview')">
+                    <i class="fas fa-home"></i>
+                    Dashboard Overview
+                </a>
+                <a href="#appointments" class="menu-item" onclick="showSection('appointments')">
+                    <i class="fas fa-calendar-alt"></i>
+                    Appointments
+                    <span class="notification-badge">3</span>
+                </a>
+                <a href="#medical-records" class="menu-item" onclick="showSection('medical-records')">
+                    <i class="fas fa-file-medical"></i>
+                    Medical Records
+                </a>
+                <a href="#billing" class="menu-item" onclick="showSection('billing')">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    Billing & Payments
+                </a>
+                <a href="#health-monitoring" class="menu-item" onclick="showSection('health-monitoring')">
+                    <i class="fas fa-heartbeat"></i>
+                    Health Monitoring
+                </a>
+                <a href="#medicine-reminder" class="menu-item" onclick="showSection('medicine-reminder')">
+                    <i class="fas fa-pills"></i>
+                    Medicine Reminder
+                </a>
+                <a href="#communication" class="menu-item" onclick="showSection('communication')">
+                    <i class="fas fa-comments"></i>
+                    Communication
+                </a>
+                <a href="#profile" class="menu-item" onclick="showSection('profile')">
+                    <i class="fas fa-user-cog"></i>
+                    Profile Settings
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Overview Section -->
+            <div id="overview-section" class="dashboard-section">
+                <div class="welcome-section">
+                    <div class="welcome-header">
+                        <div>
+                            <h1 class="welcome-title">Welcome back, {{ user.get_full_name|default:user.username }}!</h1>
+                            <p class="text-muted">Here's your health overview for today</p>
+                        </div>
+                        <div class="quick-actions">
+                            <a href="{% url 'appointments:book_appointment' %}" class="quick-action-btn btn-primary-gradient">
+                                <i class="fas fa-plus"></i>
+                                Book Appointment
+                            </a>
+                            <a href="#" class="quick-action-btn btn-success-gradient" onclick="showSection('health-monitoring')">
+                                <i class="fas fa-heartbeat"></i>
+                                Update Vitals
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="health-stat">
+                                <div class="stat-value">{{ upcoming_appointments|default:0 }}</div>
+                                <div class="stat-label">Upcoming Appointments</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="health-stat">
+                                <div class="stat-value">{{ pending_payments|default:0 }}</div>
+                                <div class="stat-label">Pending Payments</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="health-stat">
+                                <div class="stat-value">{{ medical_records|default:0 }}</div>
+                                <div class="stat-label">Medical Records</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="health-stat">
+                                <div class="stat-value">{{ medicines_today|default:0 }}</div>
+                                <div class="stat-label">Medicines Today</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Grid -->
+                <div class="dashboard-grid">
+                    <!-- Next Appointment -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-calendar-check"></i>
+                                Next Appointment
+                            </h5>
+                        </div>
+                        {% if next_appointment %}
+                            <div class="appointment-item">
+                                <div class="appointment-time">
+                                    <i class="fas fa-clock"></i>
+                                    {{ next_appointment.appointment_date|date:"F d, Y H:i" }}
+                                </div>
+                                <div class="appointment-doctor">
+                                    Dr. {{ next_appointment.doctor.get_full_name }}
+                                </div>
+                                <div class="appointment-status status-confirmed">
+                                    {{ next_appointment.get_status_display }}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                                <p class="text-muted">No upcoming appointments</p>
+                                <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary btn-sm mt-2">
+                                    Book Now
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Recent Health Trends -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-chart-line"></i>
+                                Recent Health Trends
+                            </h5>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="healthChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Medicine Reminder -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-pills"></i>
+                                Today's Medicines
+                            </h5>
+                        </div>
+                        {% if medicines_today %}
+                            {% for medicine in medicines_today %}
+                                <div class="medicine-reminder">
+                                    <div class="medicine-name">{{ medicine.name }}</div>
+                                    <div class="medicine-time">
+                                        <i class="fas fa-clock"></i>
+                                        {{ medicine.time }}
+                                    </div>
+                                    <div class="medicine-dose">{{ medicine.dose }}</div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                                <p class="text-muted">No medicines scheduled for today</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-link"></i>
+                                Quick Links
+                            </h5>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-outline-primary" onclick="showSection('medical-records')">
+                                <i class="fas fa-file-medical me-2"></i>
+                                View Medical Records
+                            </a>
+                            <a href="#" class="btn btn-outline-success" onclick="showSection('billing')">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>
+                                Pay Bills Online
+                            </a>
+                            <a href="#" class="btn btn-outline-info" onclick="showSection('communication')">
+                                <i class="fas fa-comments me-2"></i>
+                                Chat with Doctor
+                            </a>
+                            <a href="#" class="btn btn-outline-warning" onclick="showSection('health-monitoring')">
+                                <i class="fas fa-heartbeat me-2"></i>
+                                Update Health Data
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Section -->
+            <div id="appointments-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Appointment Management</h1>
+                    <p class="text-muted">Manage your appointments and schedule</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Book New Appointment -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-plus"></i>
+                                Book New Appointment
+                            </h5>
+                        </div>
+                        <p>Choose a doctor and select an available time slot</p>
+                        <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus me-2"></i>
+                            Book Appointment
+                        </a>
+                    </div>
+
+                    <!-- Appointment History -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-history"></i>
+                                Appointment History
+                            </h5>
+                        </div>
+                        <div class="appointment-item">
+                            <div class="appointment-time">
+                                <i class="fas fa-clock"></i>
+                                March 15, 2024 - 10:00 AM
+                            </div>
+                            <div class="appointment-doctor">Dr. Smith</div>
+                            <div class="appointment-status status-completed">Completed</div>
+                        </div>
+                        <div class="appointment-item">
+                            <div class="appointment-time">
+                                <i class="fas fa-clock"></i>
+                                March 10, 2024 - 2:30 PM
+                            </div>
+                            <div class="appointment-doctor">Dr. Johnson</div>
+                            <div class="appointment-status status-completed">Completed</div>
+                        </div>
+                        <a href="{% url 'appointments:my_appointments' %}" class="btn btn-outline-primary">
+                            View All History
+                        </a>
+                    </div>
+
+                    <!-- Upcoming Appointments -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                Upcoming Appointments
+                            </h5>
+                        </div>
+                        {% if upcoming_appointments_list %}
+                            {% for appointment in upcoming_appointments_list %}
+                                <div class="appointment-item">
+                                    <div class="appointment-time">
+                                        <i class="fas fa-clock"></i>
+                                        {{ appointment.appointment_date|date:"F d, Y H:i" }}
+                                    </div>
+                                    <div class="appointment-doctor">
+                                        Dr. {{ appointment.doctor.get_full_name }}
+                                    </div>
+                                    <div class="appointment-status status-confirmed">
+                                        {{ appointment.get_status_display }}
+                                    </div>
+                                    <div class="mt-2">
+                                        <a href="#" class="btn btn-sm btn-outline-primary me-2">
+                                            <i class="fas fa-edit"></i> Reschedule
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                                <p class="text-muted">No upcoming appointments</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medical Records Section -->
+            <div id="medical-records-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Digital Health Vault</h1>
+                    <p class="text-muted">Your complete medical history at your fingertips</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Prescriptions -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-prescription"></i>
+                                Prescriptions
+                            </h5>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">General Checkup</div>
+                                <div class="record-date">Dr. Smith - March 15, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <a href="#" class="btn-small btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="#" class="btn-small btn-download">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Follow-up Consultation</div>
+                                <div class="record-date">Dr. Johnson - March 10, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <a href="#" class="btn-small btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="#" class="btn-small btn-download">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lab Reports -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-vial"></i>
+                                Lab Reports
+                            </h5>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Blood Test</div>
+                                <div class="record-date">March 14, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <a href="#" class="btn-small btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="#" class="btn-small btn-download">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">X-Ray Report</div>
+                                <div class="record-date">March 8, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <a href="#" class="btn-small btn-view">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="#" class="btn-small btn-download">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vaccination Records -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-syringe"></i>
+                                Vaccination Records
+                            </h5>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">COVID-19 Vaccine</div>
+                                <div class="record-date">2nd Dose - February 15, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-success">Completed</span>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Flu Vaccine</div>
+                                <div class="record-date">Due: April 1, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-warning">Upcoming</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Section -->
+            <div id="billing-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Billing & Payments</h1>
+                    <p class="text-muted">Manage your bills and payments securely</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Current Bills -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-file-invoice"></i>
+                                Current Bills
+                            </h5>
+                        </div>
+                        <div class="bill-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="bill-amount">₹500</div>
+                                    <div class="text-muted">Consultation Fee - Dr. Smith</div>
+                                    <div class="text-muted small">March 15, 2024</div>
+                                </div>
+                                <div class="bill-status status-pending">Pending</div>
+                            </div>
+                            <div class="mt-2">
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-credit-card me-1"></i> Pay Now
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment History -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-history"></i>
+                                Payment History
+                            </h5>
+                        </div>
+                        <div class="bill-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="bill-amount">₹300</div>
+                                    <div class="text-muted">Lab Tests</div>
+                                    <div class="text-muted small">March 10, 2024</div>
+                                </div>
+                                <div class="bill-status status-paid">Paid</div>
+                            </div>
+                        </div>
+                        <div class="bill-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="bill-amount">₹500</div>
+                                    <div class="text-muted">Consultation Fee - Dr. Johnson</div>
+                                    <div class="text-muted small">March 5, 2024</div>
+                                </div>
+                                <div class="bill-status status-paid">Paid</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insurance Details -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Insurance Details
+                            </h5>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Health Insurance Plan A</div>
+                                <div class="record-date">Policy No: HI123456789</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Last Claim</div>
+                                <div class="record-date">₹200 - March 10, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-success">Approved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Health Monitoring Section -->
+            <div id="health-monitoring-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Health Monitoring</h1>
+                    <p class="text-muted">Track your daily health metrics</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Vitals Input -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-heartbeat"></i>
+                                Update Vitals
+                            </h5>
+                        </div>
+                        <form id="vitalsForm">
+                            <div class="mb-3">
+                                <label class="form-label">Blood Pressure (mmHg)</label>
+                                <input type="text" class="form-control" placeholder="120/80" id="bloodPressure">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Blood Sugar (mg/dL)</label>
+                                <input type="number" class="form-control" placeholder="90" id="bloodSugar">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" placeholder="70" id="weight">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Temperature (°F)</label>
+                                <input type="number" class="form-control" placeholder="98.6" id="temperature">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Vitals
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Health Trends Chart -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-chart-line"></i>
+                                Health Trends
+                            </h5>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="vitalsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Recent Vitals -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-history"></i>
+                                Recent Vitals
+                            </h5>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Today, 8:00 AM</div>
+                                <div class="record-date">BP: 120/80 | Sugar: 90 | Weight: 70kg</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-success">Normal</span>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Yesterday, 8:00 AM</div>
+                                <div class="record-date">BP: 118/78 | Sugar: 92 | Weight: 70kg</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-success">Normal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medicine Reminder Section -->
+            <div id="medicine-reminder-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Medicine Reminder</h1>
+                    <p class="text-muted">Never miss your medications</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Today's Medicines -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-pills"></i>
+                                Today's Medicines
+                            </h5>
+                        </div>
+                        <div class="medicine-reminder">
+                            <div class="medicine-name">Paracetamol</div>
+                            <div class="medicine-time">
+                                <i class="fas fa-clock"></i>
+                                8:00 AM - After Breakfast
+                            </div>
+                            <div class="medicine-dose">1 Tablet</div>
+                            <div class="mt-2">
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-check"></i> Taken
+                                </button>
+                            </div>
+                        </div>
+                        <div class="medicine-reminder">
+                            <div class="medicine-name">Vitamin D</div>
+                            <div class="medicine-time">
+                                <i class="fas fa-clock"></i>
+                                2:00 PM - After Lunch
+                            </div>
+                            <div class="medicine-dose">1 Tablet</div>
+                            <div class="mt-2">
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-clock"></i> Pending
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Medicine Schedule -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                Medicine Schedule
+                            </h5>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Antibiotics Course</div>
+                                <div class="record-date">Mar 15 - Mar 21, 2024</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-warning">In Progress</span>
+                            </div>
+                        </div>
+                        <div class="record-item">
+                            <div class="record-info">
+                                <div class="record-title">Vitamin Supplements</div>
+                                <div class="record-date">Daily - 30 days</div>
+                            </div>
+                            <div class="record-actions">
+                                <span class="badge bg-info">Ongoing</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add Medicine -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-plus"></i>
+                                Add Medicine
+                            </h5>
+                        </div>
+                        <form id="medicineForm">
+                            <div class="mb-3">
+                                <label class="form-label">Medicine Name</label>
+                                <input type="text" class="form-control" placeholder="Enter medicine name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Dosage</label>
+                                <input type="text" class="form-control" placeholder="e.g., 1 Tablet">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Time</label>
+                                <input type="text" class="form-control" placeholder="e.g., 8:00 AM">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Add Medicine
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Section -->
+            <div id="communication-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Communication & Support</h1>
+                    <p class="text-muted">Connect with your healthcare team</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Quick Chat -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-comments"></i>
+                                Quick Chat
+                            </h5>
+                        </div>
+                        <div class="chat-container" style="height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; padding: 1rem;">
+                            <div class="chat-message mb-2">
+                                <div class="message-bubble bg-primary text-white p-2 rounded" style="max-width: 70%; margin-left: auto;">
+                                    Hello, I need to discuss my test results.
+                                </div>
+                            </div>
+                            <div class="chat-message mb-2">
+                                <div class="message-bubble bg-light p-2 rounded" style="max-width: 70%;">
+                                    Sure! I'll be happy to help. What would you like to know?
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Type your message...">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teleconsultation -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-video"></i>
+                                Teleconsultation
+                            </h5>
+                        </div>
+                        <p>Schedule a video call with your doctor</p>
+                        <button class="btn btn-success">
+                            <i class="fas fa-video me-2"></i>Schedule Video Call
+                        </button>
+                    </div>
+
+                    <!-- Feedback -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-star"></i>
+                                Feedback & Reviews
+                            </h5>
+                        </div>
+                        <form id="feedbackForm">
+                            <div class="mb-3">
+                                <label class="form-label">Rate Your Experience</label>
+                                <div class="rating">
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-warning"></i>
+                                    <i class="fas fa-star text-muted"></i>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Your Feedback</label>
+                                <textarea class="form-control" rows="3" placeholder="Share your experience..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile-section" class="dashboard-section" style="display: none;">
+                <div class="welcome-section">
+                    <h1 class="welcome-title">Profile Settings</h1>
+                    <p class="text-muted">Manage your personal information</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Personal Information -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-user"></i>
+                                Personal Information
+                            </h5>
+                        </div>
+                        <form id="profileForm">
+                            <div class="mb-3">
+                                <label class="form-label">Full Name</label>
+                                <input type="text" class="form-control" value="{{ user.get_full_name|default:user.username }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="{{ user.email }}">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="tel" class="form-control" placeholder="+91 9876543210">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-control" rows="3" placeholder="Enter your address"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Emergency Contact -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-phone-alt"></i>
+                                Emergency Contact
+                            </h5>
+                        </div>
+                        <form id="emergencyForm">
+                            <div class="mb-3">
+                                <label class="form-label">Contact Name</label>
+                                <input type="text" class="form-control" placeholder="Enter emergency contact name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Relationship</label>
+                                <select class="form-select">
+                                    <option>Spouse</option>
+                                    <option>Parent</option>
+                                    <option>Sibling</option>
+                                    <option>Friend</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" placeholder="+91 9876543210">
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Emergency Contact
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="dashboard-card">
+                        <div class="card-header-custom">
+                            <h5 class="card-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Security Settings
+                            </h5>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control">
+                        </div>
+                        <button class="btn btn-primary">
+                            <i class="fas fa-key me-2"></i>Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOS Emergency Button -->
+    <button class="sos-button" onclick="handleSOS()">
+        <i class="fas fa-exclamation-triangle"></i>
+        SOS
+    </button>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Section Navigation
+function showSection(sectionName) {
+    // Hide all sections
+    const sections = document.querySelectorAll('.dashboard-section');
+    sections.forEach(section => section.style.display = 'none');
+    
+    // Show selected section
+    const selectedSection = document.getElementById(sectionName + '-section');
+    if (selectedSection) {
+        selectedSection.style.display = 'block';
+    }
+    
+    // Update menu active state
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => item.classList.remove('active'));
+    
+    const activeMenuItem = document.querySelector(`[href="#${sectionName}"]`);
+    if (activeMenuItem) {
+        activeMenuItem.classList.add('active');
+    }
+}
+
+// Initialize Charts
+function initCharts() {
+    // Health Trends Chart
+    const healthCtx = document.getElementById('healthChart');
+    if (healthCtx) {
+        new Chart(healthCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Blood Pressure',
+                    data: [120, 118, 122, 119, 121, 120, 118],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4
+                }, {
+                    label: 'Blood Sugar',
+                    data: [90, 92, 88, 91, 89, 90, 87],
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
+    // Vitals Chart
+    const vitalsCtx = document.getElementById('vitalsChart');
+    if (vitalsCtx) {
+        new Chart(vitalsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Today', 'Yesterday', '2 Days Ago', '3 Days Ago', '4 Days Ago'],
+                datasets: [{
+                    label: 'Blood Pressure',
+                    data: [120, 118, 122, 119, 121],
+                    backgroundColor: '#667eea'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Form Handlers
+document.getElementById('vitalsForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Vitals saved successfully!');
+    this.reset();
+});
+
+document.getElementById('medicineForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Medicine added successfully!');
+    this.reset();
+});
+
+document.getElementById('feedbackForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Feedback submitted successfully!');
+    this.reset();
+});
+
+document.getElementById('profileForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Profile updated successfully!');
+});
+
+document.getElementById('emergencyForm')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert('Emergency contact saved successfully!');
+});
+
+// SOS Handler
+function handleSOS() {
+    if (confirm('Are you sure you want to send an emergency alert?')) {
+        alert('Emergency alert sent to hospital! Help is on the way.');
+        // In a real application, this would send an actual alert
+    }
+}
+
+// Mobile Menu Toggle
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts();
+    
+    // Add mobile menu toggle button
+    if (window.innerWidth <= 768) {
+        const menuToggle = document.createElement('button');
+        menuToggle.className = 'btn btn-primary mobile-menu-toggle';
+        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+        menuToggle.onclick = toggleSidebar;
+        menuToggle.style.cssText = 'position: fixed; top: 1rem; left: 1rem; z-index: 1001;';
+        document.body.appendChild(menuToggle);
+    }
+});
+
+// Rating System
+document.querySelectorAll('.rating .fa-star').forEach(star => {
+    star.addEventListener('click', function() {
+        const stars = this.parentElement.querySelectorAll('.fa-star');
+        const rating = Array.from(stars).indexOf(this) + 1;
+        
+        stars.forEach((s, index) => {
+            if (index < rating) {
+                s.classList.remove('text-muted');
+                s.classList.add('text-warning');
+            } else {
+                s.classList.remove('text-warning');
+                s.classList.add('text-muted');
+            }
+        });
+    });
+});
+
+// Medicine Taken Handler
+document.querySelectorAll('.medicine-reminder button').forEach(button => {
+    button.addEventListener('click', function() {
+        if (this.innerHTML.includes('Taken')) {
+            this.innerHTML = '<i class="fas fa-check"></i> Taken';
+            this.className = 'btn btn-success btn-sm';
+        } else {
+            this.innerHTML = '<i class="fas fa-clock"></i> Pending';
+            this.className = 'btn btn-outline-secondary btn-sm';
+        }
+    });
+});
+</script>
+{% endblock %}

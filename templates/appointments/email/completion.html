@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Completed</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 20px; text-align: center; background: #f1f1f1; font-size: 12px; }
+        .btn { display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+        .appointment-details { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .detail-row { margin: 10px 0; }
+        .label { font-weight: bold; color: #555; }
+        .feedback-box { background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .rating { font-size: 24px; color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Appointment Completed</h1>
+            <p>Thank you for visiting our hospital</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear {{ patient.get_full_name|default:patient.username }},</p>
+            <p>Your appointment with Dr. {{ doctor.get_full_name }} has been completed. We hope you received excellent care!</p>
+            
+            <div class="appointment-details">
+                <div class="detail-row">
+                    <span class="label">Patient Name:</span> {{ appointment.patient_name }}
+                </div>
+                <div class="detail-row">
+                    <span class="label">Doctor:</span> Dr. {{ doctor.get_full_name }}
+                </div>
+                <div class="detail-row">
+                    <span class="label">Appointment Date:</span> {{ appointment.appointment_date|date:"F d, Y" }} at {{ appointment.appointment_date|date:"g:i A" }}
+                </div>
+            </div>
+            
+            <div class="feedback-box">
+                <h3>⭐ We Value Your Feedback!</h3>
+                <p>Your feedback helps us improve our services and provide better care to all patients.</p>
+                <p>Please take a moment to rate your experience:</p>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <div class="rating">
+                        ★★★★★
+                    </div>
+                    <p>How would you rate your experience?</p>
+                </div>
+                
+                <p><strong>What we'd like to know:</strong></p>
+                <ul>
+                    <li>Quality of care received</li>
+                    <li>Doctor's communication and bedside manner</li>
+                    <li>Waiting time and overall experience</li>
+                    <li>Any suggestions for improvement</li>
+                </ul>
+                
+                <p style="text-align: center; margin: 20px 0;">
+                    <a href="#" class="btn">Submit Feedback</a>
+                </p>
+            </div>
+            
+            <p><strong>Follow-up Information:</strong></p>
+            {% if appointment.follow_up_date %}
+                <p>You have a follow-up appointment scheduled for {{ appointment.follow_up_date|date:"F d, Y" }} at {{ appointment.follow_up_date|date:"g:i A" }}.</p>
+            {% else %}
+                <p>If you need a follow-up appointment or have any questions about your treatment, please contact us.</p>
+            {% endif %}
+            
+            {% if appointment.prescribed_medication %}
+            <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <h4>💊 Medication Reminder</h4>
+                <p>Please follow your prescribed medication as directed by Dr. {{ doctor.get_full_name }}.</p>
+                <p>If you experience any side effects, contact us immediately.</p>
+            </div>
+            {% endif %}
+            
+            <p><strong>Need Assistance?</strong></p>
+            <p>
+                📞 24/7 Helpline: (555) 123-4567<br>
+                📧 Email: care@hms.com<br>
+                💬 Live Chat: Available on our website
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>This is an automated message from Hospital Management System</p>
+            <p>© 2024 HMS. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

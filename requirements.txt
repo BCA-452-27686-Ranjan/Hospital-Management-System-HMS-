@@ -1,0 +1,13 @@
+Django==4.2.7
+django-crispy-forms==2.1
+crispy-bootstrap5==0.7
+python-decouple==3.8
+Pillow==10.1.0
+django-extensions==3.2.3
+xlsxwriter==3.1.9
+celery==5.3.4
+redis==5.0.1
+reportlab==4.0.7
+openpyxl==3.1.2
+django-phonenumber-field==7.3.0
+phonenumbers==8.13.25

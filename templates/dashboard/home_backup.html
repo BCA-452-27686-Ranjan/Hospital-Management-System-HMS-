@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>Welcome to HMS</h1>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="badge bg-primary fs-6">{{ user.get_role_display }}</span>
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if user.role == 'ADMIN' %}
+        <!-- Admin Dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-users fa-2x text-info mb-2"></i>
+                        <h3 class="counter" data-target="{{ total_patients }}">0</h3>
+                        <p class="card-text">Total Patients</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-user-md fa-2x text-success mb-2"></i>
+                        <h3 class="counter" data-target="{{ total_doctors }}">0</h3>
+                        <p class="card-text">Total Doctors</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x text-warning mb-2"></i>
+                        <h3 class="counter" data-target="{{ total_appointments }}">0</h3>
+                        <p class="card-text">Total Appointments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-day fa-2x text-danger mb-2"></i>
+                        <h3 class="counter" data-target="{{ today_appointments }}">0</h3>
+                        <p class="card-text">Today's Appointments</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Recent Activity -->
+            <div class="col-md-8 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-stream me-2"></i>Recent Activity</h5>
+                        <button class="btn btn-sm btn-outline-light" onclick="loadActivity()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="activity-feed" class="activity-feed">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'dashboard:admin_panel' %}" class="btn btn-primary">
+                                <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
+                            </a>
+                            <a href="/admin/" class="btn btn-secondary">
+                                <i class="fas fa-tools me-2"></i>Django Admin
+                            </a>
+                            <a href="{% url 'appointments:my_appointments' %}" class="btn btn-info">
+                                <i class="fas fa-list me-2"></i>All Appointments
+                            </a>
+                            <button class="btn btn-success" onclick="showSupportModal()">
+                                <i class="fas fa-headset me-2"></i>24×7 Support
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- HMS Info Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-info-circle me-2"></i>About Hospital Management System</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Comprehensive Healthcare Management</h6>
+                                <p>HMS provides a complete solution for managing hospital operations, patient records, appointments, and medical staff.</p>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <h6>Key Features</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success me-2"></i>Patient Management</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Doctor Scheduling</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Appointment Booking</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Medical Records</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Role-based Access</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Benefits</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-star text-warning me-2"></i>Streamlined Operations</li>
+                                            <li><i class="fas fa-star text-warning me-2"></i>Enhanced Patient Care</li>
+                                            <li><i class="fas fa-star text-warning me-2"></i>Real-time Updates</li>
+                                            <li><i class="fas fa-star text-warning me-2"></i>Secure & Compliant</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <i class="fas fa-hospital fa-4x text-primary mb-3"></i>
+                                    <h6>24×7 Support</h6>
+                                    <p class="text-muted">Our support team is always here to help you</p>
+                                    <button class="btn btn-outline-primary" onclick="showSupportModal()">
+                                        <i class="fas fa-phone me-2"></i>Contact Support
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% elif user.role == 'DOCTOR' %}
+        <!-- Doctor Dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-day fa-2x text-primary mb-2"></i>
+                        <h3 class="counter" data-target="{{ today_appointments }}">0</h3>
+                        <p class="card-text">Today's Appointments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                        <h3 class="counter" data-target="{{ pending_appointments }}">0</h3>
+                        <p class="card-text">Pending Confirmation</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x text-info mb-2"></i>
+                        <h3 class="counter" data-target="{{ scheduled_appointments }}">0</h3>
+                        <p class="card-text">Scheduled</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                        <h3 class="counter" data-target="{{ completed_appointments }}">0</h3>
+                        <p class="card-text">Completed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-user-md me-2"></i>Doctor Dashboard</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-md fa-4x text-primary mb-3"></i>
+                        <h3>Manage Your Practice</h3>
+                        <p class="text-muted">View appointments, manage your schedule, and access patient records</p>
+                        <div class="alert alert-info">
+                            <strong>Quick Actions:</strong> Use the navigation menu to access appointments, schedule management, and patient history.
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
+                            <a href="{% url 'appointments:doctor_dashboard' %}" class="btn btn-primary">
+                                <i class="fas fa-calendar me-2"></i>My Appointments
+                            </a>
+                            <a href="{% url 'appointments:manage_schedule' %}" class="btn btn-success">
+                                <i class="fas fa-calendar-week me-2"></i>Manage Schedule
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Patient Dashboard -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar fa-2x text-primary mb-2"></i>
+                        <h3 class="counter" data-target="{{ total_appointments }}">0</h3>
+                        <p class="card-text">Total Appointments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+                        <h3 class="counter" data-target="{{ upcoming_appointments }}">0</h3>
+                        <p class="card-text">Upcoming Appointments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center dashboard-card">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fa-2x text-info mb-2"></i>
+                        <h3 class="counter" data-target="{{ completed_appointments }}">0</h3>
+                        <p class="card-text">Completed Visits</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-user me-2"></i>Patient Dashboard</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <i class="fas fa-user fa-4x text-primary mb-3"></i>
+                        <h3>Your Health Journey</h3>
+                        <p class="text-muted">Book appointments, track your visits, and manage your health records</p>
+                        <div class="alert alert-info">
+                            <strong>Get Started:</strong> Book your first appointment to experience quality healthcare management.
+                        </div>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-3">
+                            <a href="{% url 'appointments:book_appointment' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Book Appointment
+                            </a>
+                            <a href="{% url 'appointments:my_appointments' %}" class="btn btn-success">
+                                <i class="fas fa-list me-2"></i>My Appointments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Support Modal -->
+<div class="modal fade" id="supportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-headset me-2"></i>24×7 Support</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-headset fa-3x text-primary mb-3"></i>
+                    <h4>We're Here to Help!</h4>
+                    <p class="text-muted">Our support team is available 24/7 to assist you</p>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-primary">
+                            <div class="card-body text-center">
+                                <i class="fas fa-phone fa-2x text-primary mb-2"></i>
+                                <h6>Phone Support</h6>
+                                <p class="mb-0"><strong>+1 234 567 8900</strong></p>
+                                <small class="text-muted">Available 24/7</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <i class="fas fa-envelope fa-2x text-success mb-2"></i>
+                                <h6>Email Support</h6>
+                                <p class="mb-0"><strong>support@hms.com</strong></p>
+                                <small class="text-muted">Response within 2 hours</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <h6>Support Hours</h6>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <strong>Monday - Friday</strong><br>
+                            8:00 AM - 8:00 PM
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Saturday</strong><br>
+                            9:00 AM - 6:00 PM
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Sunday</strong><br>
+                            10:00 AM - 4:00 PM
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Start Live Chat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-refresh dashboard every 30 seconds
+let refreshInterval;
+
+function startAutoRefresh() {
+    refreshInterval = setInterval(() => {
+        refreshDashboard();
+        loadActivity();
+    }, 30000); // 30 seconds
+}
+
+function stopAutoRefresh() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+    }
+}
+
+function refreshDashboard() {
+    fetch('{% url "dashboard:dashboard_stats" %}')
+        .then(response => response.json())
+        .then(data => {
+            // Update counters with animation
+            Object.keys(data).forEach(key => {
+                const element = document.querySelector(`[data-target="${key}"]`);
+                if (element) {
+                    animateCounter(element, data[key]);
+                }
+            });
+        })
+        .catch(error => console.error('Error refreshing dashboard:', error));
+}
+
+function loadActivity() {
+    const activityFeed = document.getElementById('activity-feed');
+    if (activityFeed) {
+        fetch('{% url "dashboard:recent_activity" %}')
+            .then(response => response.json())
+            .then(data => {
+                let html = '';
+                if (data.activity && data.activity.length > 0) {
+                    data.activity.forEach(item => {
+                        const icon = item.type === 'appointment' ? 'fa-calendar' : 'fa-user';
+                        const color = item.status === 'Completed' ? 'success' : 
+                                      item.status === 'Scheduled' ? 'primary' : 'warning';
+                        
+                        html += `
+                            <div class="activity-item d-flex align-items-start mb-3 p-3 border rounded">
+                                <div class="activity-icon me-3">
+                                    <i class="fas ${icon} fa-lg text-${color}"></i>
+                                </div>
+                                <div class="activity-content flex-grow-1">
+                                    <div class="activity-message">${item.message}</div>
+                                    <div class="activity-time text-muted small">
+                                        <i class="fas fa-clock me-1"></i>${item.time}
+                                        <span class="badge bg-${color} ms-2">${item.status}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html = '<div class="text-center py-4 text-muted">No recent activity</div>';
+                }
+                activityFeed.innerHTML = html;
+            })
+            .catch(error => console.error('Error loading activity:', error));
+    }
+}
+
+function animateCounter(element, target) {
+    const duration = 1000;
+    const start = parseInt(element.textContent);
+    const increment = (target - start) / (duration / 16);
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if ((increment > 0 && current >= target) || (increment < 0 && current <= target)) {
+            element.textContent = target;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.ceil(current);
+        }
+    }, 16);
+}
+
+function showSupportModal() {
+    const modal = new bootstrap.Modal(document.getElementById('supportModal'));
+    modal.show();
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startAutoRefresh();
+    loadActivity();
+});
+
+// Stop auto-refresh when page is hidden
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        stopAutoRefresh();
+    } else {
+        startAutoRefresh();
+    }
+});
+</script>
+
+<style>
+.dashboard-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    overflow: hidden;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.activity-item {
+    transition: background-color 0.3s ease;
+}
+
+.activity-item:hover {
+    background-color: #f8f9fa;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+}
+
+.counter {
+    font-weight: bold;
+    color: var(--bs-primary);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Cancel Appointment - HMS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Cancel Appointment
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Are you sure you want to cancel this appointment? This action cannot be undone.
+                    </div>
+                    
+                    <div class="appointment-details mb-4">
+                        <h6 class="mb-3">Appointment Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Patient:</strong> {{ appointment.patient.get_full_name }}</p>
+                                <p><strong>Date & Time:</strong> {{ appointment.appointment_date|date:"M d, Y H:i" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Doctor:</strong> Dr. {{ appointment.doctor.get_full_name }}</p>
+                                <p><strong>Status:</strong> {{ appointment.get_status_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'appointments:appointment_detail' appointment.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Appointment
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-times me-2"></i>Confirm Cancellation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
