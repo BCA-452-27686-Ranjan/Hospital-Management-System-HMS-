@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Hospital Management System (HMS)
 
 A comprehensive Django-based hospital management system for efficient healthcare administration.
@@ -318,3 +319,7 @@ Target performance benchmarks:
 ---
 
 **Built with ❤️ using Django, Bootstrap, and modern web technologies.**
+=======
+# Hospital-Management-System-HMS-
+A Django-based Hospital Management System for academic submission.
+>>>>>>> 22cd675fbf5b2a3e3d712ece8e82e7ab17608692
